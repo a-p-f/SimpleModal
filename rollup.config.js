@@ -18,7 +18,7 @@ export default [
       babel(),
     	// nodeResolve(), 
     	// commonjs(), 
-    	serve({open: true, port: 10002}), 
+    	serve({open: true, port: 10003}), 
     	livereload({watch: 'dev'})
     ],
   },
