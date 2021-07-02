@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<html style='background-color: white;'>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Close Modal</title>
+<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js" defer></script>
+<link rel="stylesheet" type="text/css" href="/tests/styles.css">
+
+<button autofocus onclick="
+    var correct_error = false;
+    var raised_error = null;
+    try {
+        SimpleModal.close(document);
+    }
+    catch (e) {
+        correct_error = e instanceof DOMException;
+        raised_error = e;
+    }
+
+    // Verify that we're using the x-origin/postMessage close method
+    if (!correct_error) {
+        console.error('Did not get DOMException. Got: ', raised_error);
+        return
+    }
+
+    SimpleModal.close('SUCCESS');
+
+">Close</button>

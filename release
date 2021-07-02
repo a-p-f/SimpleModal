@@ -1,0 +1,37 @@
+#!/bin/bash
+# Build dist code, tag commit, push 
+# Version number should match what you've described in 
+
+[ $# -ne 1 ] && { echo "Usage: $0 version_number"; exit 1; }
+
+version=$1
+tag="v${version}"
+
+# Ensure tag doesn't already exist
+if [[ $(git tag -l $tag) ]]; then
+    echo "Tag already exists"
+    exit 1
+fi
+
+# Add to release notes to git, ensure repo is otherwise clean
+git add RELEASE_NOTES.md || exit 1
+STATUS=$(git status --porcelain)
+read -r -d '' EXPECTED_STATUS << EOM
+M  RELEASE_NOTES.md
+EOM
+if [ "$STATUS" != "$EXPECTED_STATUS" ]; then
+    echo "Repository not clean. The only changes should be RELEASE_NOTES.md. Aborting."
+    exit 1
+fi
+
+# Update version in package.json (mainly so rollup knows, and can put in comment)
+npm version ${version} --git-tag-version=false --allow-same-version=true
+
+# Clean/build
+rm -r dist
+npm run build || exit 1;
+
+git add -A
+git commit -m $tag || exit 1;
+git tag -a -m "" $tag || exit 1;
+git push origin || exit 1;

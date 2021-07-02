@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+
+<html style="background-color: yellow">
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Close Modal</title>
+<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js" defer></script>
+<link rel="stylesheet" type="text/css" href="/tests/styles.css">
+
+An alert should be displayed when the child opens.
+<button onclick="
+    var button = this;
+    SimpleModal.open('modal.html', {
+        onload: function(w) {
+            if (w == window || w.parent != window) {
+                console.error('incorrect window was passed to onload: ', w);
+                return
+            }
+            w.alert('Success!');
+        },
+    });
+" autofocus>Open Modal</button>
+
+<small>Note - you <em>might</em> see the alert before you see the child modal - that's okay. That's just how the browser works.</small>

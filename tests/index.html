@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SimpleModal Tests</title>
+<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js" defer></script>
+<link rel="stylesheet" type="text/css" href="/tests/styles.css">
+<script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous"></script>
+
+<style>
+    a {display: block;}
+</style>
+
+<script type="text/javascript">
+    $(document).on('click', 'a[target="_blank"]', function(e) {
+        if (e.defaultPrevented) return;
+        e.preventDefault();
+        window.open(this.href);
+    });  
+</script>
+
+<h1>SimpleModal Tests</h1>
+<p>Each test opens in a new window. The window should describe what should happen in that test. When the test is done, you can close the window, and launch the next.</p>
+<p>If the window closes itself, that means the test was successful (but not all tests do this).</p>
+
+<h2>Basics</h2>
+<a href="open_and_cover.html" target="_blank">open(), ensure visible on top</a>
+<a href="autofocus_and_title/" target="_blank">autofocus and aria-label</a>
+<a href="error_page_background/" target="_blank">Error Page Background</a>
+<a href="onload/" target="_blank">onload option called each load</a>
+<a href="close_child/" target="_blank">closeChild, with value</a>
+<a href="close_self/" target="_blank">close, with non-serializable value</a>
+<a href="onclose_promise/" target="_blank">Closing Promise</a>
+
+<h2>X-origin</h2>
+<a href="close_self_x_origin/" target="_blank">x-origin close value</a>
+<a href="autofocus_and_title_xorigin/" target="_blank">autofocus and aria-label</a>
+
+<h2>Extras</h2>
+<a href="alert_modal/" target="_blank">alert modal</a>
+
+
+<!--
+<p>The following iframe is cross-origin, and useful for testing.</p>
+<iframe src="data:text/html;charset=utf-8,CROSS ORIGIN FRAME"></iframe>
+-->

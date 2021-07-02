@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Focus and Title</title>
+<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js" defer></script>
+<link rel="stylesheet" type="text/css" href="/tests/styles.css">
+
+
+<script>
+    addEventListener('load', function() {
+        // Ensure we give the parent some time to set us up - might actually be after we process load event
+        setTimeout(function() {
+            var label = window.parent.document.querySelector('iframe').getAttribute('aria-label');
+            if (label != 'Focus and Title') {
+                console.error('aria-label of iframe is not as expected: ', label);
+                return
+            }
+            if (document.activeElement.nodeName != 'BUTTON') {
+                console.error('button is not focused!');
+                return
+            }
+
+            if (window.name == 'load2') {
+                window.parent.close();
+            }
+            else {
+                window.name = 'load2';
+                location.reload();
+            }
+        }, 100);
+    })
+</script>
+
+<button autofocus>Dummy</button>

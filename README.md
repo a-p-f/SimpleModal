@@ -1,0 +1,90 @@
+# SimpleModal.js
+
+Inspired by openModal.js, but somewhate simplified (doesn't create an extra history state when opening iframe).
+
+Think of `SimpleModal.open(url)` as an alternative to `window.open(url)`. It opens the specified document in a "modal layer" over top of your existing page. Modal layers have the following features:
+
+- **Modal:** The user cannot interact with the opening window until the modal layer is closed.
+- **Cover Entire Viewport:** Modal layers cover the entire viewport, have a transparent background, and render no border/chrome of their own. It's up to the document inside the modal layer to decide to how to lay itself out (full-page, light box, alert style window, etc.).
+- **Accessible:** Screen reader friendly, and focus is trapped inside the modal layer. TODO - more screen reader testing.
+- **Cross-origin Capable:** Cross-origin layers are supported.
+
+## Installation
+- copy dist/SimpleModal.js to your server
+- add SimpleModal.js to your parent page (and optionally, to your child pages)
+- `SimpleModal` is now available globally
+
+## Other Features of Note
+
+### `autofocus` Support
+In child windows, elements with `autofocus` attribute will be focused automatically on every load. 
+
+Note - for x-origin children, this requires that the child document also loads SimpleModal.js).
+
+### "Smart Background"
+If you open a same-origin document in a modal layer, and there is no `background-color` on the `<html>` element (or if it is transparent), then we'll automatically add a solid white background behind it.
+
+This is mainly to support server generated error pages (ie. 404 pages), which don't usually set an explicit background color. Without this feature, opening a modal layer to a url which returns an error page would be very confusing (the error message would display over top of your window, but having a transparent background, it would be difficult to see).
+
+Your modal pages should be sure to set an explicit, not-completely-transparent `background-color` on the `html` element. If you want a virtually transparent background, use `rgba(0,0,0,0.004)`. This is roughly equivalent to `#00000001`, which seems to be the least opaque value that is not treated as equivalent to `transparent` by any browsers (#RGBA and #RRGGBBAA hex notation are not supported in IE, so don't use `#00000001` if you're supporting IE). 
+
+## Parent Window API
+
+### SimpleModal.open(url, [options]) -> Promise | null
+Opens url in a modal layer.
+
+IFF the `Promise` constructor is defined, will return a promise which resolves when the modal is closed, with the same value as passed to `options.onclose` (see below). This feature doesn't let you do anything you can't already do with `options.onclose`, but can more convenient (especially if used with `async`/`await`). If you're using this feature and want to support IE, be sure to provide a `Promise` polyfill.
+
+#### options.onload: function(Window)
+A callback, which will be called each time a new page loads in the modal layer. It will be passed the modal window as its sole argument.
+
+#### options.onclose: function(value)
+A callback, which will be called when the modal window is closed. The argument will be whatever was passed to `SimpleModal.closeChild`, or `undefined`.
+
+### SimpleModal.closeChild([value], [then])
+If a current modal layer exists, close it. Otherwise, throw an error.
+
+`value`: will be passed to the `onclose` callback that was specified when the modal layer was opened.
+
+`then`: if specified, this callback will be called after the modal has finished closing. It will be passed the parent window as its sole argument. The main purpose of this callback is so that the child window can close itself, and then cause the parent to take some action after it is fully closed (ie. open another modal, navigate to another page, etc).
+
+Note - generally, the child will dismiss itself. Our recommended approach is not to call this method directly. Rather, we recommend including SimpleModal.js in the child window, and calling `SimpleModal.close()` from the child window.
+
+## Child Window API
+
+The following features are intended to be used in child windows. 
+
+### window.parent
+The parent/opening window. This is a standard `Window` property, available inside any iframe. We generally treat our usage of an iframe as an implementation detail, but we do explicitly endorse using `window.parent`.
+
+### SimpleModal.close([value], [then])
+Note - you must include SimpleModal.js in the child window for this to be available.
+
+Essentially, this just calls `window.parent.SimpleModal.closeChild(value, then)`.
+
+If the parent is x-origin, `value` must be serializable (since it will be passed to parent via `postMessage`) and `then` is not supported at all.
+
+Will throw an error if this window is either not in an iframe, or the parent is same-origin but this window is not a SimpleModal child.
+
+If there is a parent window, and that parent is x-origin, we can't be sure whether or not we are a SimpleModal child. In this case, we ask the parent to close us (via `postMessage` api). If we are not actually a SimpleModal child, nothing will happen.
+
+## Warnings/Caveats
+We don't recommend creating any additional history entries from within the modal window. TODO: explain why.
+
+## Child Window Styles/Animations
+
+It's up to the child window to position/style itself within the browser viewport, create any "modal window chrome", and provide any entrance/exit animations.
+
+We provide [SimpleModalAnimator.js](./extras/SimpleModalAnimator.js) and [AlertModal.css](./extras/AlertModal.css), which you can use on your SimpleModal child pages. Feel free to use these as a starting point, and edit as desired.
+
+## Things We Might Add Later
+
+### SimpleModal.getChild() -> Window | null
+
+### SimpleModal.isChild() -> Boolean
+
+### SimpleModal.storage 
+Idea - with same-origin parent, window.parent holds the key prefix
+If x-origin, don't use a prefix - assume you're the topmost layer on this domain
+
+

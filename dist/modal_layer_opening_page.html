@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<title>ModalLayer Opening</title>
+<script>
+    var second_load_hash = '#SECOND_LOAD';
+    if (location.hash == second_load_hash) {
+        window.parent.postMessage('MODAL_LAYER_OPENING_PAGE_RETURNED', '*');
+    }
+    else {
+        // Force a new state, so that this page will reload when user hits back()
+        // (some) browsers would not otherwise return to this page, since it just redirects immediately
+        // Also, change the url, so that on return, we know it's the second time around on this page
+        history.pushState(null, '', second_load_hash);
+        window.parent.postMessage('MODAL_LAYER_OPENING_PAGE_OPENED', '*');
+    }
+</script>

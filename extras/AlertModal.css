@@ -1,0 +1,139 @@
+/*
+    AlertModal.css
+    Implements a "window" which:
+        - is centered horizontally in the viewport
+        - grows as needed (vertically) to fit content
+        - supports a "minimum margin" around the window
+        - supports a border and border radius
+        - scrolls within the window, 
+            rather than moving the entire window in the viewport
+
+    Most styles should not be overridden, except where indicated.
+*/
+html {
+    height: 100%;
+
+    /* minimum spacing around "window" */
+    /* Feel free to use relative units, for larger gap on larger screens */
+    padding: 15px;
+    box-sizing: border-box;
+
+    /* position the "window" */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    /* Use this instead if you want to center the window vertically */
+    /*justify-content: center;*/
+
+    /* 
+        We need to explicitly set an overflow value (other than auto?) so that overflow on body is not treated as applied to this element
+        
+        That's just a weird quirk of the CSS spec 
+    */
+    overflow: hidden;
+
+    /* 
+        We MUST set a background color other than transparent, or body background-color (which is probably solid) will be treated as if applied to this element 
+
+        That's just a weird quirk of the CSS spec 
+        Minimum possible opacity: #00000001
+    */
+    /* This color format not supported in IE! */
+    /*background-color: #00000044;*/
+    background-color: rgba(0,0,0,0.25); 
+}
+body {
+    margin: 0 !important;
+
+    /*
+        Feel free to override any of these
+    */
+    border: 1px solid #555;
+    border-radius: 5px;
+    box-shadow: 0 0 10px 5px #555;
+    background-color: white;
+
+    /*
+        You need to set an "initial" width.
+        Can use absolute or relative units.
+        This is more like a max width - the width will shrink as necessary on small screens.
+    */
+    width: 700px;
+    max-width: 100%; 
+    height: auto;
+    box-sizing: border-box;
+    overflow: auto;
+
+    /*
+        You could add top/bottom padding, too, but we prefer to set top/bottom margin on child elements
+        
+        Be sure to update AlertModalBreakOut when updating horizontal padding
+    */
+    padding: 0 1rem;
+}
+
+/* 
+    Utility class that you can set on a direct child of body, 
+    so that it renders "right to the edges" of the alert window
+*/
+.AlertModalBreakOut {
+    margin-left: -1rem;
+    margin-right: -1rem;
+}
+
+/* 
+    mobile style 
+
+    Turn off border radius, and top/left/right "gaps" between body and viewport.
+
+    You might also want to force body height to 100%, but we've left it dynamic.
+
+    You can change this behaviour, change the breakpoint, or drop this entirely.
+*/
+@media (max-width: 900px) {
+    html {
+        padding: 0;
+    }
+    body {
+        width: 100%;
+        border-radius: 0;
+        border: none;
+    }
+}
+
+/*
+    Animation styles
+
+    For use with SimpleModalAnimator.js
+*/
+html.SimpleModal-animating {
+    transition: background-color 0.3s ease;
+    /* helps with flicker (in chrome) */
+    -webkit-backface-visibility: hidden;
+}
+html.SimpleModal-animating body {
+    transition: transform 0.3s ease-out;
+    /* helps with flicker (in chrome) */
+    -webkit-backface-visibility: hidden; 
+}
+html.SimpleModal-closing body {
+    /* "reverse" the timing of the entrance animation */
+    transition-timing-function: ease-in;
+}
+html.SimpleModal-out {
+    /* 
+        This is the minimum possible opacity.
+        Below this, and the body background color (which is white), will be treated as if applied to <html>
+    */
+    /*background-color: #00000001; - this color format not supported in IE*/
+    background-color: rgba(0,0,0,0.004);
+}
+html.SimpleModal-out body {
+    /*
+        You could translate it, so that it slides into view, but that gives the suggestion that the user can dismiss it via a swipe (especially on mobile)
+
+        We think this animation provides less of a "false hint"
+    */
+    transform: scale(0, 0);
+}

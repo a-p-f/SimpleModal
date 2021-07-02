@@ -1,0 +1,5 @@
+#!/bin/bash
+# Build and push to surge (the online demo/test/documentation)
+# You may want to run this independent of release, if you're just changing documentation, without changing code
+./node_modules/.bin/rollup -c rollup.config.live.js
+surge . SimpleModal.surge.sh

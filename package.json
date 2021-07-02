@@ -1,0 +1,30 @@
+{
+  "name": "SimpleModal",
+  "version": "1.0.0",
+  "description": "A modal version of window.open()",
+  "scripts": {
+    "start": "rollup -c rollup.config.js --watch",
+    "build": "rollup -c rollup.config.dist.js",
+    "test": "echo \"no test specified\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a-p-f/SimpleModal.git"
+  },
+  "author": "Alex Fischer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/a-p-f/SimpleModal/issues"
+  },
+  "homepage": "https://github.com/a-p-f/SimpleModal#readme",
+  "devDependencies": {
+    "@babel/core": "^7.11.6",
+    "@babel/preset-env": "^7.11.5",
+    "npm-version": "^1.1.0",
+    "rollup": "^2.28.2",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-livereload": "^2.0.0",
+    "rollup-plugin-serve": "^1.1.0",
+    "rollup-plugin-terser": "^7.0.2"
+  }
+}

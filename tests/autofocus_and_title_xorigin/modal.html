@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<html style="background-color: white">
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Focus and Title</title>
+<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js" defer></script>
+<link rel="stylesheet" type="text/css" href="/tests/styles.css">
+
+
+<script>
+    addEventListener('load', function() {
+        // First, verify that we're treated as x-origin
+        var correct_error = false;
+        var raised_error = null;
+        try {
+            console.log(window.parent.location.href);
+        }
+        catch (e) {
+            correct_error = e instanceof DOMException;
+            raised_error = e;
+        }
+        if (!correct_error) {
+            console.error('Did not get DOMException. Got: ', raised_error);
+            return
+        }
+
+        // Ensure we give the parent some time to set us up - might actually be after we process load event
+        setTimeout(function() {
+            if (document.activeElement.nodeName != 'BUTTON') {
+                alert('Error: button is not focused!');
+                return
+            }
+            if (window.name == 'load2') {
+                document.querySelector('p').innerText = 'Please verify it again.';
+            }
+        }, 100);
+    })
+</script>
+
+<p>Please use the inspector to verify that the iframe's aria-label is "Focus and Title".</p>
+<button autofocus onclick="
+    if (window.name == 'load2') {
+        window.parent.close();
+    }
+    else {
+        window.name = 'load2';
+        location.reload();
+    }
+">It is.</button>

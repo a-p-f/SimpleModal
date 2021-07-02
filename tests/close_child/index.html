@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+
+<html style="background-color: yellow">
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Close Modal</title>
+<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js" defer></script>
+<link rel="stylesheet" type="text/css" href="/tests/styles.css">
+
+This should open a modal, and then immediately close it. It verifies that the value passed to SimpleModal.closeChild is passed to the onclose callback.
+<button onclick="
+    var button = this;
+    SimpleModal.open('modal.html', {
+        onload: function() {
+            SimpleModal.closeChild(button);
+        },
+        onclose: function(value) {
+            if (value === button) {
+                window.close();
+            }
+            else {
+                console.error('Expected ', button, ' but got ', value);
+            }
+        },
+    });
+" autofocus>Open Modal</button>
