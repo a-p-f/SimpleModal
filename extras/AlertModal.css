@@ -107,33 +107,30 @@ body {
 
     For use with SimpleModalAnimator.js
 */
-html.SimpleModal-animating {
-    transition: background-color 0.3s ease;
-    /* helps with flicker (in chrome) */
-    -webkit-backface-visibility: hidden;
+@keyframes SimpleModal-backdrop {
+    0% {
+        background-color: rgba(0,0,0,0.004);
+    }
+    /* implicit keyframe at 100% is default styles */
 }
-html.SimpleModal-animating body {
-    transition: transform 0.3s ease-out;
-    /* helps with flicker (in chrome) */
-    -webkit-backface-visibility: hidden; 
+@keyframes SimpleModal-slideup {
+    0% {
+        transform: scale(0,0);
+    }
+    /* implicit keyframe at 100% is default styles */
 }
-html.SimpleModal-closing body {
-    /* "reverse" the timing of the entrance animation */
-    transition-timing-function: ease-in;
+html, body {
+    animation-duration: 0.3s;
+    animation-timing-function: ease-in;
 }
-html.SimpleModal-out {
-    /* 
-        This is the minimum possible opacity.
-        Below this, and the body background color (which is white), will be treated as if applied to <html>
-    */
-    /*background-color: #00000001; - this color format not supported in IE*/
-    background-color: rgba(0,0,0,0.004);
+.SimpleModal-animating {
+    animation-name: SimpleModal-backdrop;
 }
-html.SimpleModal-out body {
-    /*
-        You could translate it, so that it slides into view, but that gives the suggestion that the user can dismiss it via a swipe (especially on mobile)
-
-        We think this animation provides less of a "false hint"
-    */
-    transform: scale(0, 0);
+.SimpleModal-animating body {
+    animation-name: SimpleModal-slideup;
+}
+.SimpleModal-closing, .SimpleModal-closing body {
+    animation-direction: reverse;
+    /* make sure the offscreen state persists while window is closed */
+    animation-fill-mode: forwards;
 }
