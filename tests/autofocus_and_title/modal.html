@@ -17,10 +17,6 @@
                 console.error('aria-label of iframe is not as expected: ', label);
                 return
             }
-            if (document.activeElement.nodeName != 'BUTTON') {
-                console.error('button is not focused!');
-                return
-            }
 
             if (window.name == 'load2') {
                 window.parent.close();

@@ -38,8 +38,6 @@ addEventListener('message', function(event) {
 	if (window.parent == window || event.source != window.parent) return
 
 	if (event.data == 'SIMPLE_MODAL_CHILD_LOADED') {
-		const autofocus = document.querySelector('[autofocus]');
-		autofocus && autofocus.focus();
 		window.parent.postMessage({
 			simple_modal_child_titled: document.title, 
 		}, '*');
@@ -76,18 +74,24 @@ export function open(url, {
 		iframe.style.backgroundColor = should_set_opaque_background(iframe) ? 'white' : '';
 
 		if (is_same_origin(iframe)) {
-			const autofocus = iframe.contentDocument.querySelector('[autofocus]');
-			autofocus && autofocus.focus();
 			iframe.setAttribute('aria-label', iframe.contentDocument.title);
 		}
 		else {
-			// Tell the child to autofocus and to pass us its title
+			// Tell the child to pass us its title
 			iframe.contentWindow.postMessage('SIMPLE_MODAL_CHILD_LOADED', '*');
 		}
 
 		onload(iframe.contentWindow);
 
+		// Only needed on first load, but no harm running every load
 		iframe.style.visibility = '';
+		// Firefox doesn't let us focus the iframe before it's visible, so we do it here
+		// Make sure it's not already activeElement, though
+		// (if the child window programmatically focused one of it's elements, calling iframe.focus() will cause that element to lose focus)
+		if (iframe != document.activeElement) {
+			iframe.focus();
+		}
+
 	}
 	iframe.src = url;
 

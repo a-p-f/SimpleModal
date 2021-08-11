@@ -16,11 +16,6 @@ Think of `SimpleModal.open(url)` as an alternative to `window.open(url)`. It ope
 
 ## Other Features of Note
 
-### `autofocus` Support
-In child windows, elements with `autofocus` attribute will be focused automatically on every load. 
-
-Note - for x-origin children, this requires that the child document also loads SimpleModal.js).
-
 ### "Smart Background"
 If you open a same-origin document in a modal layer, and there is no `background-color` on the `<html>` element (or if it is transparent), then we'll automatically add a solid white background behind it.
 
@@ -78,6 +73,8 @@ It's up to the child window to position/style itself within the browser viewport
 We provide [SimpleModalAnimator.js](./extras/SimpleModalAnimator.js) and [AlertModal.css](./extras/AlertModal.css), which you can use on your SimpleModal child pages. Feel free to use these as a starting point, and edit as desired.
 
 ## Things We Might Add Later
+
+### [autofocus] support in SimpleModalAnimator
 
 ### SimpleModal.getChild() -> Window | null
 

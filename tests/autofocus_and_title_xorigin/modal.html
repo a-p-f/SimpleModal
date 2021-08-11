@@ -29,10 +29,6 @@
 
         // Ensure we give the parent some time to set us up - might actually be after we process load event
         setTimeout(function() {
-            if (document.activeElement.nodeName != 'BUTTON') {
-                alert('Error: button is not focused!');
-                return
-            }
             if (window.name == 'load2') {
                 document.querySelector('p').innerText = 'Please verify it again.';
             }
