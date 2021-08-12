@@ -1,7 +1,7 @@
 import {lockScroll, releaseScroll} from './lockScroll.js';
 
 let previousActiveElement;
-let iframe = null;
+export let iframe = null;
 
 export function create_iframe() {
 	/*
@@ -51,8 +51,6 @@ export function create_iframe() {
 	iframe.setAttribute('aria-modal', 'true');
 	document.body.appendChild(iframe);
 	iframe.focus();
-
-	return iframe;
 }
 export function remove_iframe() {
 	if (!iframe) return
