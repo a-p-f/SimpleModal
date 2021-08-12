@@ -113,11 +113,15 @@ body {
     }
     /* implicit keyframe at 100% is default styles */
 }
-@keyframes SimpleModal-slideup {
+@keyframes SimpleModal-pop-in {
     0% {
         transform: scale(0,0);
     }
     /* implicit keyframe at 100% is default styles */
+    100% {
+        /* Shouldn't be needed, but this IS needed in Safari, if the body element contains an input */
+        transform: none; 
+    }
 }
 html, body {
     animation-duration: 0.3s;
@@ -127,7 +131,7 @@ html, body {
     animation-name: SimpleModal-backdrop;
 }
 .SimpleModal-animating body {
-    animation-name: SimpleModal-slideup;
+    animation-name: SimpleModal-pop-in;
 }
 .SimpleModal-closing, .SimpleModal-closing body {
     animation-direction: reverse;

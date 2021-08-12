@@ -9,10 +9,12 @@
 
 <script defer src="/extras/SimpleModalAnimator.js"></script>
 <link rel="stylesheet" type="text/css" href="/extras/AlertModal.css">
-
+    
 <p>This is an alert-style modal. Ensure that it animates in nicely on the first load.</p>
 
-<p>Ensure that when you <a autofocus href="?PAGE_2">click here</a>, the window navigates (the QS below should change), and ensure that the window does NOT re-animate.</p>
+<p>Note - this input is here because the presence of an input seems to break animations in Safari, under certain circumstances: <input name=""></p>
+
+<p>Ensure that when you <a autofocusOFF href="?PAGE_2">click here</a>, the window navigates (the QS below should change), and ensure that the window does NOT re-animate.</p>
 <p>QS: <output id="querystring"></output></p>
 <script>
     document.getElementById('querystring').innerText = location.search;

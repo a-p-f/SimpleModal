@@ -29,6 +29,10 @@
         // make sure the offscreen state persists after animation completes, while window is closed
         animation-fill-mode: forwards;
     }
+
+    Tip:
+    Your animation shouldn't generally need to duplicate your "default" properties at the 100% keyframe.
+    However, if you don't have the property defined anywhere in your stylesheets, you may need to set it explicitly, or the animation may break in Safari under certain circumstances.
 */
 (function() {
 'use strict';
