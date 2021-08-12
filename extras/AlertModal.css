@@ -113,9 +113,9 @@ body {
     }
     /* implicit keyframe at 100% is default styles */
 }
-@keyframes SimpleModal-pop-in {
+@keyframes SimpleModal-slide-up {
     0% {
-        transform: scale(0,0);
+        transform: translateY(100vh);
     }
     /* implicit keyframe at 100% is default styles */
     100% {
@@ -131,7 +131,7 @@ html, body {
     animation-name: SimpleModal-backdrop;
 }
 .SimpleModal-animating body {
-    animation-name: SimpleModal-pop-in;
+    animation-name: SimpleModal-slide-up;
 }
 .SimpleModal-closing, .SimpleModal-closing body {
     animation-direction: reverse;
