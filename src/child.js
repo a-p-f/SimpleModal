@@ -1,3 +1,5 @@
+import config from './config.js';
+
 // Listen to messages from parent
 addEventListener('message', function(event) {
     if (window.parent == window || event.source != window.parent) return
@@ -8,6 +10,51 @@ addEventListener('message', function(event) {
         }, '*');
     }
 });
+
+export function autofocus() {
+    const target = document.querySelector('[simple-modal-autofocus]');
+    target && target.focus();
+}
+
+function after_html_animation(callback) {
+    var h = document.documentElement;
+    var animation_seconds = parseFloat(getComputedStyle(h).animationDuration);
+    setTimeout(callback, animation_seconds*1000);
+}
+if (config.animate) {
+    /*
+       Wait for load event before revealing - make sure stylesheets have loaded and have been applied
+       Otherwise, 2 issues:
+       - we might animate before page is ready (before iframe is visible in parent) and user won't see it
+       -  getComputedStyle in after_html_animation may block (waiting on stylesheets), blocking all "before-load" scripts
+    */
+    if (document.querySelector('[autofocus]')) {
+        /*
+            Note - Safari seems to focus [autofocus] elements, even though this is an iframe. That broke our entrance animation on another site, but we haven't yet been able to replicate it. Seems to depend on page structure.
+        */
+        console.warn('autofocus not recommended when using SimpleModal animations. Can sometimes break animations in Safari, but only in certain situations.');
+    }
+    addEventListener('load', function() {
+        let h = document.documentElement;
+        h.classList.add('SimpleModal-opening');
+        h.classList.add('SimpleModal-animating');
+        after_html_animation(function() {
+            h.classList.remove('SimpleModal-opening');
+            h.classList.remove('SimpleModal-animating');
+            config.autofocus && autofocus();
+        });
+    });
+}
+else {
+    config.autofocus && autofocus();
+}
+export function animateOut(then) {
+    var h = document.documentElement;
+    h.classList.add('SimpleModal-closing');
+    h.classList.add('SimpleModal-animating');
+    after_html_animation(then);
+}
+
 function get_same_origin_parent_simple_modal() {
     // Throws an exception if parent is x-origin
     // Returns null if no parent or not a modal child (ie. regular iframe)
@@ -15,7 +62,7 @@ function get_same_origin_parent_simple_modal() {
     if (!pml || pml.getChild() != window) return null;
     return pml;
 }
-export function close(value=null, then=null) {
+function _close(value=null, then=null) {
     let parent_simple_modal;
     let x_origin = false;
     try {
@@ -57,4 +104,15 @@ export function close(value=null, then=null) {
         value: value,
         message: 'CLOSE_SIMPLE_MODAL_CHILD',
     }, '*');
+}
+export function close(value=null, then=null) {
+    function do_close() {
+        _close(value, then);
+    }
+    if (config.animate) {
+        animateOut(do_close);
+    }
+    else {
+        do_close();
+    }
 }

@@ -38,10 +38,22 @@ html {
 
         That's just a weird quirk of the CSS spec 
         Minimum possible opacity: #00000001
+        But that format isn't supported by IE, so use:
+        rgba(0,0,0,0.04)
     */
-    /* This color format not supported in IE! */
-    /*background-color: #00000044;*/
-    background-color: rgba(0,0,0,0.25); 
+    background-color: rgba(0,0,0,0.04);
+}
+/*
+    Note - two reasons to use pseudo element for backdrop, rather than setting on <html>
+    - Firefox seems to have issues reverse animating <html>
+    - allows us to animate opacity, which may be more efficient than animating background color
+*/
+html:before {
+    content: '';
+    position: absolute;
+    top: 0;left: 0;width: 100%;height: 100%;
+    z-index: -1;
+    background-color: rgba(0,0,0,0.25);
 }
 body {
     margin: 0 !important;
@@ -104,18 +116,17 @@ body {
 
 /*
     Animation styles
-
-    For use with SimpleModalAnimator.js
 */
-@keyframes SimpleModal-backdrop {
+@keyframes SimpleModal-fade-in {
     0% {
-        background-color: rgba(0,0,0,0.004);
+        opacity: 0;
     }
     /* implicit keyframe at 100% is default styles */
 }
-@keyframes SimpleModal-slide-up {
+
+@keyframes SimpleModal-slide-down {
     0% {
-        transform: translateY(100vh);
+        transform: translateY(-100%);
     }
     /* implicit keyframe at 100% is default styles */
     100% {
@@ -123,17 +134,17 @@ body {
         transform: none; 
     }
 }
-html, body {
+html, body, html:before {
     animation-duration: 0.3s;
     animation-timing-function: ease-in;
 }
-.SimpleModal-animating {
-    animation-name: SimpleModal-backdrop;
+.SimpleModal-animating:before {
+    animation-name: SimpleModal-fade-in;
 }
 .SimpleModal-animating body {
-    animation-name: SimpleModal-slide-up;
+    animation-name: SimpleModal-slide-down;
 }
-.SimpleModal-closing, .SimpleModal-closing body {
+.SimpleModal-closing:before, .SimpleModal-closing body {
     animation-direction: reverse;
     /* make sure the offscreen state persists while window is closed */
     animation-fill-mode: forwards;

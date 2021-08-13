@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html simple-modal-config="animate autofocus">
 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,22 +8,10 @@
 <script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js" defer></script>
 <link rel="stylesheet" type="text/css" href="/tests/styles.css">
 
-<script defer src="/extras/SimpleModalAnimator.js"></script>
 <link rel="stylesheet" type="text/css" href="/extras/AlertModal.css">
     
-<p>This is an alert-style modal. Ensure that it animates in nicely on the first load.</p>
+<p>This is an alert-style modal. Ensure that it animates in nicely, and animates out nicely when you close it.</p>
 
-<!-- Note - Safari seems to focus [autofocus] elements, even though this is an iframe. That broke our entrance animation on another site, but we haven't yet been able to replicate it here. This autofocus element _may_ not break the entrance animation in Safari, but that doesn't mean it will always work. Seems to depend on page structure. -->
-<p>Note - Safari seems to focus autofocus elements, even though this is an iframe, and that can break animations: <input autofocus></p>
-
-<p>Note - this input is here because the presence of an input seems to break animations in Safari, under certain circumstances: <input name=""></p>
-
-<p>Ensure that when you <a autofocusOFF href="?PAGE_2">click here</a>, the window navigates (the QS below should change), and ensure that the window does NOT re-animate.</p>
-<p>QS: <output id="querystring"></output></p>
-<script>
-    document.getElementById('querystring').innerText = location.search;
-</script>
-
-<button onclick="SimpleModal.close();">Close</button>
+<button onclick="SimpleModal.close();" simple-modal-autofocus>Close</button>
 
 <div class="block-margin"></div>
