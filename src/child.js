@@ -1,15 +1,17 @@
 import config from './config.js';
 
 // Listen to messages from parent
-addEventListener('message', function(event) {
-    if (window.parent == window || event.source != window.parent) return
+if (window.parent != window) {
+    addEventListener('message', function(event) {
+        if (event.source != window.parent) return
 
-    if (event.data == 'SIMPLE_MODAL_CHILD_LOADED') {
-        window.parent.postMessage({
-            simple_modal_child_titled: document.title, 
-        }, '*');
-    }
-});
+        if (event.data == 'SIMPLE_MODAL_CHILD_LOADED') {
+            window.parent.postMessage({
+                simple_modal_child_titled: document.title, 
+            }, '*');
+        }
+    });   
+}
 
 export function autofocus() {
     const target = document.querySelector('[simple-modal-autofocus]');
@@ -55,31 +57,30 @@ export function animateOut(then) {
     after_html_animation(then);
 }
 
-function get_same_origin_parent_simple_modal() {
-    // Throws an exception if parent is x-origin
-    // Returns null if no parent or not a modal child (ie. regular iframe)
-    const pml = window.parent != window && window.parent.SimpleModal;
-    if (!pml || pml.getChild() != window) return null;
-    return pml;
+function assertIframed() {
+    if (window.parent == window) throw new Error('This is not a SimpleModal child window (it\'s not even in iframe)');
 }
-function _close(value=null, then=null) {
-    let parent_simple_modal;
-    let x_origin = false;
+function isSameOrigin() {
     try {
-        parent_simple_modal = get_same_origin_parent_simple_modal();
+        return Boolean(window.parent.location.hostname)
     }
     catch (e) {
-        x_origin = true;
+        return false;
     }
+}
+function requiredLayerInParent() {
+    const layer = window.parent.SimpleModal && window.parent.SimpleModal.layerForWindow(window);
+    if (!layer) throw new Error("This is not a SimpleModal child window");
+    return layer
+}
+function _close(value=null, then=null) {
+    assertIframed();
 
-    if (parent_simple_modal) {
-        // Note - call parent's closeChild() directly, rather than using postMessage
-        // This allows same-origin windows to pass non-serializable values
-        parent_simple_modal.closeChild(value, then);
+    if (isSameOrigin()) {
+        const layer = requiredLayerInParent();
+        window.parent.SimpleModal.resolveLayer(layer, value);
+        then && then();
         return
-    }
-    if (!x_origin) {
-        throw new Error('This window is not a SimpleModal child.');
     }
 
     /*
@@ -115,4 +116,12 @@ export function close(value=null, then=null) {
     else {
         do_close();
     }
+}
+export function replace(url) {
+    parent.postMessage({
+        simple_modal_replace_url: url,
+    });
+}
+export function reload() {
+    replace(location.href);
 }

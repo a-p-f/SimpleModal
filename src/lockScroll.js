@@ -1,6 +1,8 @@
 let maxWidth, overflowX, overflowY;
 let scrollTop, scrollLeft, isLocked;
 export function lockScroll() {
+	if (isLocked) return
+		
 	const de = document.documentElement;
 	const ds = de.style;
 	const bs = document.body.style;	
