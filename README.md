@@ -63,6 +63,43 @@ Will throw an error if this window is either not in an iframe, or the parent is 
 
 If there is a parent window, and that parent is x-origin, we can't be sure whether or not we are a SimpleModal child. In this case, we ask the parent to close us (via `postMessage` api). If we are not actually a SimpleModal child, nothing will happen.
 
+## Opt-in Features
+A few features are opt-in. You opt-in by setting the `simple-modal-config` attribute on the `<html>` element appropriately. The value should be a space-separated list of keywords. Ie. use `<html simple-modal-config="animate autofocus">` to enable animations and autofocus support.
+
+Currently, all of these optional features are designed to run in the child/modal window, so you must set the attribute there.
+
+### Animation Support
+Opt in via `simple-modal-config="animate"`.
+
+When the window loads, we'll add `SimpleModal-animating SimpleModal-opening` classes to the html element. You should use these classes to define a CSS animation on which ever elements you want to animate.
+
+After the entrace animation, we remove both classes.
+
+When you call SimpleModal.close(), we'll add `SimpleModal-animating SimpleModal-closing` to the html element. Use these to define your exit animation.
+
+After the exit animation, the window will be closed.
+
+Tips/notes:
+- exit animations are only run when you call `SimpleModal.close()` in from the child window, _not_ if you call `SimpleModal.closeChild()` in the parent
+- you must set `animation-duration` on the html element (at least when the `SimpleModal-animating` class is present), even if you don't animate it; this is how we determine how long your animation runs
+- you can use the same `animation-name` for entrance and exit animations; just be sure you set it only when `SimpleModal-animating` is present (it must be turned off between entrance and exit animations, or exit animation won't run)
+- if using same `animation-name` for entrance and exit, you probably want `animation-direction: reverse` when `SimpleModal-closing` is present
+- you probably want `animation-fill-mode: forwards` when `SimpleModal-closing` is present (to ensure the "closed" styles persist while we close the modal layer) 
+
+See extras/AlertModal.css for a sample styles.
+
+### Autofocus
+
+Opt in via `simple-modal-config="autofocus"`.
+
+After window load event, we'll focus the first element with the `simple-modal-autofocus` attribute present (if one exists). 
+
+If you have animations enabled, we delay focusing until the entrance animation has completed (focusing an element while it's animating on-screen can sometimes disrupt the animation).
+
+We use a custom attribute (rather than `autofocus`) because Safari seems automatically focus `autofocus` elements (most browsers don't, inside of dynamically added-iframes), and this can sometimes disrupt your entrance animations (in very markup-, style-, and browser-dependent manner, which is hard to predict).
+
+Whether you use this feature or not, we recommend that you never set `autofocus` on any element inside your modal windows. 
+
 ## Warnings/Caveats
 We don't recommend creating any additional history entries from within the modal window. TODO: explain why.
 
@@ -70,11 +107,13 @@ We don't recommend creating any additional history entries from within the modal
 
 It's up to the child window to position/style itself within the browser viewport, create any "modal window chrome", and provide any entrance/exit animations.
 
-We provide [SimpleModalAnimator.js](./extras/SimpleModalAnimator.js) and [AlertModal.css](./extras/AlertModal.css), which you can use on your SimpleModal child pages. Feel free to use these as a starting point, and edit as desired.
+We provide [AlertModal.css](./extras/AlertModal.css), which you can use on your SimpleModal child pages. Feel free to use these as a starting point, and edit as desired.
 
 ## Things We Might Add Later
 
-### [autofocus] support in SimpleModalAnimator
+### SimpleModal.reload/replace
+Load a new iframe (no animations), and replace current one.
+Ensures no new history entries created (like location.reload/replace), and ensures no "iframe flicker" (which seems to happend consistently in Chrome when navigating iframe)
 
 ### SimpleModal.getChild() -> Window | null
 

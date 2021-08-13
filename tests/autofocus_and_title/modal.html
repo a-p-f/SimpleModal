@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 
+<html simple-modal-config="autofocus">
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Focus and Title</title>
@@ -17,6 +19,10 @@
                 console.error('aria-label of iframe is not as expected: ', label);
                 return
             }
+            if (document.activeElement.nodeName != 'BUTTON') {
+                console.error('button is not focused!');
+                return
+            }
 
             if (window.name == 'load2') {
                 window.parent.close();
@@ -29,4 +35,4 @@
     })
 </script>
 
-<button autofocus>Dummy</button>
+<button simple-modal-autofocus>Dummy</button>
