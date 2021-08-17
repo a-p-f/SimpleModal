@@ -7,9 +7,6 @@ if (window.parent != window) {
         if (event.source != window.parent) return
         const data = event.data;
 
-        if (getMessage(data) == 'PREPARE_SIMPLE_MODAL_CHILD') {
-            prepare_window(data.skipAnimation);
-        }
         if (getMessage(data) == 'CANCEL_SIMPLE_MODAL_ANIMATIONS') {
             if (config.animate) {
                 cancel_animations();
