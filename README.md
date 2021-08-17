@@ -63,6 +63,13 @@ Will throw an error if this window is either not in an iframe, or the parent is 
 
 If there is a parent window, and that parent is x-origin, we can't be sure whether or not we are a SimpleModal child. In this case, we ask the parent to close us (via `postMessage` api). If we are not actually a SimpleModal child, nothing will happen.
 
+### SimpleModal.reload() / SimpleModal.replace(url)
+These behave much like calling `location.reload()` or `location.replace(url)` would inside the modal window. However, we actually create a new iframe and repalce the current one, ensuring that there is no "iframe flicker" (which seems to happen consistently in Chrome when navigating an iframe).
+
+Also, if you're using our animation support, these methods ensure that the entrance animation does _not_ run again.
+
+Note that unlike `location.reload()`, `SimpleModal.reload()` is not able to persist `history.state` or scroll position.
+
 ## Opt-in Features
 A few features are opt-in. You opt-in by setting the `simple-modal-config` attribute on the `<html>` element appropriately. The value should be a space-separated list of keywords. Ie. use `<html simple-modal-config="animate autofocus">` to enable animations and autofocus support.
 
@@ -110,10 +117,6 @@ It's up to the child window to position/style itself within the browser viewport
 We provide [AlertModal.css](./extras/AlertModal.css), which you can use on your SimpleModal child pages. Feel free to use these as a starting point, and edit as desired.
 
 ## Things We Might Add Later
-
-### SimpleModal.reload/replace
-Load a new iframe (no animations), and replace current one.
-Ensures no new history entries created (like location.reload/replace), and ensures no "iframe flicker" (which seems to happend consistently in Chrome when navigating iframe)
 
 ### SimpleModal.getChild() -> Window | null
 

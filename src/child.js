@@ -1,14 +1,17 @@
 import config from './config.js';
+import {isObject, getMessage} from './utils.js';
+import * as hashConfig from './hashConfig.js';
+
+const childConfig = hashConfig.readAndClean();
 
 // Listen to messages from parent
 if (window.parent != window) {
     addEventListener('message', function(event) {
         if (event.source != window.parent) return
+        const data = event.data;
 
-        if (event.data == 'SIMPLE_MODAL_CHILD_LOADED') {
-            window.parent.postMessage({
-                simple_modal_child_titled: document.title, 
-            }, '*');
+        if (getMessage(data) == 'PREPARE_SIMPLE_MODAL_CHILD') {
+            prepare_window(data.skipAnimation);
         }
     });   
 }
@@ -23,20 +26,21 @@ function after_html_animation(callback) {
     var animation_seconds = parseFloat(getComputedStyle(h).animationDuration);
     setTimeout(callback, animation_seconds*1000);
 }
-if (config.animate) {
-    /*
-       Wait for load event before revealing - make sure stylesheets have loaded and have been applied
-       Otherwise, 2 issues:
-       - we might animate before page is ready (before iframe is visible in parent) and user won't see it
-       -  getComputedStyle in after_html_animation may block (waiting on stylesheets), blocking all "before-load" scripts
-    */
-    if (document.querySelector('[autofocus]')) {
-        /*
-            Note - Safari seems to focus [autofocus] elements, even though this is an iframe. That broke our entrance animation on another site, but we haven't yet been able to replicate it. Seems to depend on page structure.
-        */
-        console.warn('autofocus not recommended when using SimpleModal animations. Can sometimes break animations in Safari, but only in certain situations.');
-    }
-    addEventListener('load', function() {
+
+/*
+    Wait for load event for multiple reasons:
+    - ensure layout is finished before we start animation
+    -  getComputedStyle in after_html_animation may block (waiting on stylesheets), blocking all "before-load" scripts
+    - support autofocusing of dynamically added elements (as long as they are present before we run)
+*/
+addEventListener('load', function() {
+    if (config.animate && childConfig.animate) {
+        if (document.querySelector('[autofocus]')) {
+            /*
+                Note - Safari seems to focus [autofocus] elements, even though this is an iframe. That broke our entrance animation on another site, but we haven't yet been able to replicate it. Seems to depend on page structure.
+            */
+            console.warn('autofocus not recommended when using SimpleModal animations. Can sometimes break animations in Safari, but only in certain situations.');
+        }
         let h = document.documentElement;
         h.classList.add('SimpleModal-opening');
         h.classList.add('SimpleModal-animating');
@@ -45,11 +49,12 @@ if (config.animate) {
             h.classList.remove('SimpleModal-animating');
             config.autofocus && autofocus();
         });
-    });
-}
-else {
-    config.autofocus && autofocus();
-}
+    }
+    else {
+        config.autofocus && autofocus();
+    }
+});
+
 export function animateOut(then) {
     var h = document.documentElement;
     h.classList.add('SimpleModal-closing');
@@ -119,8 +124,9 @@ export function close(value=null, then=null) {
 }
 export function replace(url) {
     parent.postMessage({
-        simple_modal_replace_url: url,
-    });
+        message: 'REPLACE_SIMPLE_MODAL',
+        url: url,
+    }, '*');
 }
 export function reload() {
     replace(location.href);

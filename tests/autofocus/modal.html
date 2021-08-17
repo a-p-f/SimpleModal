@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+
+<html simple-modal-config="autofocus">
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Focus and Title</title>
+<script src="/tests/SimpleModal.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js" defer></script>
+<link rel="stylesheet" type="text/css" href="/tests/styles.css">
+
+
+<script>
+    addEventListener('load', function() {
+        // Ensure we give the parent some time to set us up - might actually be after we process load event
+        setTimeout(function() {
+            if (document.activeElement.nodeName != 'BUTTON') {
+                console.error('button is not focused!');
+                return
+            }
+            if (window.name == 'load2') {
+                window.parent.close();
+            }
+            else {
+                window.name = 'load2';
+                location.reload();
+            }
+        }, 100);
+    })
+</script>
+
+<button simple-modal-autofocus>Dummy</button>
