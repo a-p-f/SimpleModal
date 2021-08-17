@@ -1,13 +1,14 @@
-import * as hashConfig from './hashConfig.js';
 import makeIframe from './makeIframe.js';
 import {lockScroll, releaseScroll} from './lockScroll.js';
-import {isObject, getMessage} from './utils.js';
+import {isObject, getMessage, postMessage} from './utils.js';
 
 const layers = [];
 let initialActiveElement;
 
 function is_same_origin(iframe) {
-    return Boolean(iframe.contentDocument);
+    try {
+        return Boolean(iframe.contentDocument);
+    } catch(e) {return false}
 }
 function should_set_opaque_background(iframe) {
     // If the iframe is x-origin, we cannot  test the html element.
@@ -24,13 +25,14 @@ function layerLoaded(layer) {
     // To help with that, if the background of the <html> element is totally transparent, we'll set a background color on the iframe
     iframe.style.backgroundColor = should_set_opaque_background(iframe) ? 'white' : '';
 
-    // Only needed on first load, but no harm running every load
-    layer.iframe.style.opacity = '';
     if (layer.replaces) {
-        resolve(layer.replaces);
-        layer.replaces = null;
+        postMessage(layer.iframe.contentWindow, 'CANCEL_SIMPLE_MODAL_ANIMATIONS');
+        // Don't reveal until it tells us it has canceled animations
     }
-
+    else {
+        // Only needed on first load, but no harm running every load
+        layer.iframe.style.opacity = '';        
+    }
     // Seems to be needed in IE - iframe blurs when it reloads
     // We want to be sure to run it now, before we call the onload callback (rather than waiting for our focus listener)
     focusTopIfNeeded();
@@ -68,7 +70,7 @@ export function open(layer, src, {animate=true}={}) {
     document.body.appendChild(iframe);
     iframe.addEventListener('load', layerLoaded.bind(null, layer));
     iframe.focus();
-    iframe.src = hashConfig.setting(src, {animate});
+    iframe.src = src;
 }
 export function resolve(layer, value) {
     // Remove it from list
@@ -131,5 +133,10 @@ function handleChildMessages() {
     }
     if (getMessage(data) == 'REPLACE_SIMPLE_MODAL') {
         replace(layer, data.url);
+    }
+    if (getMessage(data) == 'SIMPLE_MODAL_ANIMATIONS_CANCELED') {
+        layer.iframe.style.opacity = '';
+        resolve(layer.replaces);
+        layer.replaces = null;
     }
 }

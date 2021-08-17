@@ -10,19 +10,17 @@
 <link rel="stylesheet" type="text/css" href="/tests/styles.css">
 
 <button autofocus onclick="
-    var correct_error = false;
-    var raised_error = null;
+    var x_origin;
     try {
-        SimpleModal.close(document);
-    }
-    catch (e) {
-        correct_error = e instanceof DOMException;
-        raised_error = e;
+        window.parent.location.href;
+        x_origin = false;
+    } catch (e) {
+        x_origin = true;
     }
 
-    // Verify that we're using the x-origin/postMessage close method
-    if (!correct_error) {
-        console.error('Did not get DOMException. Got: ', raised_error);
+    // Verify that we're x-origin, using postMessage version of close
+    if (!x_origin) {
+        console.error('We do not seem to x-origin');
         return
     }
 

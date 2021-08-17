@@ -4,3 +4,6 @@ export function isObject(anything) {
 export function getMessage(anything) {
     return isObject(anything) && anything.message;
 }
+export function postMessage(target, message) {
+    target.postMessage({message: message}, '*');
+}

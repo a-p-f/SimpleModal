@@ -1,8 +1,5 @@
 import config from './config.js';
-import {isObject, getMessage} from './utils.js';
-import * as hashConfig from './hashConfig.js';
-
-const childConfig = hashConfig.readAndClean();
+import {isObject, getMessage, postMessage} from './utils.js';
 
 // Listen to messages from parent
 if (window.parent != window) {
@@ -12,6 +9,12 @@ if (window.parent != window) {
 
         if (getMessage(data) == 'PREPARE_SIMPLE_MODAL_CHILD') {
             prepare_window(data.skipAnimation);
+        }
+        if (getMessage(data) == 'CANCEL_SIMPLE_MODAL_ANIMATIONS') {
+            if (config.animate) {
+                cancel_animations();
+            }
+            postMessage(window.parent, 'SIMPLE_MODAL_ANIMATIONS_CANCELED');
         }
     });   
 }
@@ -33,21 +36,28 @@ function after_html_animation(callback) {
     -  getComputedStyle in after_html_animation may block (waiting on stylesheets), blocking all "before-load" scripts
     - support autofocusing of dynamically added elements (as long as they are present before we run)
 */
+let animations_canceled = false;
+function cancel_animations() {
+    if (animations_canceled) return;
+    animations_canceled = true;
+    const h = document.documentElement;
+    h.classList.remove('SimpleModal-opening');
+    h.classList.remove('SimpleModal-animating');
+    config.autofocus && autofocus();
+}
 addEventListener('load', function() {
-    if (config.animate && childConfig.animate) {
+    if (config.animate) {
         if (document.querySelector('[autofocus]')) {
             /*
                 Note - Safari seems to focus [autofocus] elements, even though this is an iframe. That broke our entrance animation on another site, but we haven't yet been able to replicate it. Seems to depend on page structure.
             */
             console.warn('autofocus not recommended when using SimpleModal animations. Can sometimes break animations in Safari, but only in certain situations.');
         }
-        let h = document.documentElement;
+        const h = document.documentElement;
         h.classList.add('SimpleModal-opening');
         h.classList.add('SimpleModal-animating');
         after_html_animation(function() {
-            h.classList.remove('SimpleModal-opening');
-            h.classList.remove('SimpleModal-animating');
-            config.autofocus && autofocus();
+            cancel_animations();
         });
     }
     else {
