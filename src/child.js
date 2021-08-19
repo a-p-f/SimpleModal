@@ -13,7 +13,21 @@ if (window.parent != window) {
             }
             postMessage(window.parent, 'SIMPLE_MODAL_ANIMATIONS_CANCELED');
         }
-    });   
+    });
+    trackAndRestoreFocus();
+}
+
+function trackAndRestoreFocus() {
+    // track active element within this iframe
+    let ae = document.activeElement;
+    document.documentElement.addEventListener('focus', function() {
+        ae = document.activeElement;
+    }, true);
+
+    // when iframe regains focus, re-focus the correct element
+    addEventListener('focus', function() {
+        ae && ae.focus();
+    });
 }
 
 export function autofocus() {

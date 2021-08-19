@@ -1,10 +1,30 @@
-import makeIframe from './makeIframe.js';
-import {lockScroll, releaseScroll} from './lockScroll.js';
+import * as aria from './aria.js';
+import * as positioning from './positioning.js';
+import * as scrollLocking from './scrollLocking.js';
+import * as focus from './focus.js';
+
 import {isObject, getMessage, postMessage} from './utils.js';
 
 const layers = [];
-let initialActiveElement;
+function makeIframe(sandbox) {
+    const iframe = document.createElement('iframe');
+    const s = iframe.style;
 
+    // Don't make the iframe visible until it has loaded
+    // This makes it easier to animate in
+    // Use opacity, rather than visibility, because browser don't let you focus hidden elements
+    // May be more performant to toggle opacity, too
+    // s.visibility = 'hidden';
+    s.opacity = 0;
+
+    if (sandbox !== null) {
+        iframe.setAttribute('sandbox', sandbox);
+    }
+    return iframe;
+}
+function reveal(iframe) {
+    iframe.style.opacity = '';
+}
 function is_same_origin(iframe) {
     try {
         return Boolean(iframe.contentDocument);
@@ -31,24 +51,13 @@ function layerLoaded(layer) {
     }
     else {
         // Only needed on first load, but no harm running every load
-        layer.iframe.style.opacity = '';        
+        reveal(iframe);
     }
     // Seems to be needed in IE - iframe blurs when it reloads
-    // We want to be sure to run it now, before we call the onload callback (rather than waiting for our focus listener)
-    focusTopIfNeeded();
+    // We want to be sure to focus it now, before we call the onload callback (rather than waiting for our focus listener)
+    if (iframe != document.activeElement) iframe.focus();
 
     layer.onload && layer.onload(layer.iframe.contentWindow);
-}
-function getActiveElement() {
-    let c = document.activeElement;
-    // If the activeElement is an iframe, try to descend into the iframe
-    // If we reach a cross-origin iframe, error will be thrown
-    try {
-        while (c && c.contentDocument && c.contentDocument.activeElement) {
-            c = c.contentDocument.activeElement;
-        }
-    } catch(e) {}
-    return c;
 }
 export function layerForWindow(w) {
     for (let i = 0; i < layers.length; i++) {
@@ -59,17 +68,17 @@ export function top() {
     // Notice - will be undefined if no layers open
     return layers[layers.length-1];
 }
-export function open(layer, src, {animate=true}={}) {
-    if (layers.length == 0) {
-        initialActiveElement = getActiveElement();
-        lockScroll();
-        attachGlobalListeners();
-    }
+export function open(layer, src) {
+    const iframe = makeIframe(layer.sandbox);
+    layer.iframe = iframe;
     layers.push(layer);
-    const iframe = layer.iframe;
-    document.body.appendChild(iframe);
+
+    scrollLocking.init(layer);
+    positioning.init(layer);
+    focus.init(layer);
+    aria.init(layer);
+
     iframe.addEventListener('load', layerLoaded.bind(null, layer));
-    iframe.focus();
     iframe.src = src;
 }
 export function resolve(layer, value) {
@@ -78,22 +87,17 @@ export function resolve(layer, value) {
     if (index==-1) throw new Error('Layer is not in layers.');
     layers.splice(index, 1);
 
-    layer.iframe.parentElement && layer.iframe.parentElement.removeChild(layer.iframe);
-    if (layers.length == 0) {
-        releaseScroll();
-        initialActiveElement && initialActiveElement.focus();
-        detachGlobalListeners();
-    }
-    else {
-        focusTopIfNeeded();
-    }
+    aria.release(layer);
+    focus.release(layer);
+    positioning.release(layer);
+    scrollLocking.release(layer);
+
     layer.onclose && layer.onclose(value);
     layer.promiseResolver && layer.promiseResolver(value);
 }
 export function replace(layer, url) {
     const next = {
         sandbox: layer.sandbox,
-        iframe: makeIframe(layer.sandbox),
         onload: layer.onload,
         onclose: layer.onclose,
         promiseResolver: layer.promiseResolver,
@@ -105,22 +109,14 @@ export function replace(layer, url) {
     layer.promiseResolver = null;
 
     next.replaces = layer;
-    open(next, url, {animate: false});
+    open(next, url);
 }
-function attachGlobalListeners() {
-    document.documentElement.addEventListener('focus', focusTopIfNeeded, true);
-    addEventListener('message', handleChildMessages);
+export function updatePositions() {
+    for (var i = 0; i < layers.length; i++) {
+        positioning.update(layers[i]);
+    }
 }
-function detachGlobalListeners() {
-    document.documentElement.removeEventListener('focus', focusTopIfNeeded, true);
-    removeEventListener('message', handleChildMessages);
-}
-// TODO - play nice with other "dynamic overlays" - if focus moved to an element after iframe in DOM, then do nothing
-function focusTopIfNeeded() {
-    const layer = top();
-    if (layer && layer.iframe != document.activeElement) layer.iframe.focus();
-}
-function handleChildMessages() {
+addEventListener('message', function(event) {
     const layer = layerForWindow(event.source);
     if (!layer) return
     
@@ -135,8 +131,8 @@ function handleChildMessages() {
         replace(layer, data.url);
     }
     if (getMessage(data) == 'SIMPLE_MODAL_ANIMATIONS_CANCELED') {
-        layer.iframe.style.opacity = '';
+        reveal(layer.iframe);
         resolve(layer.replaces);
         layer.replaces = null;
     }
-}
+});

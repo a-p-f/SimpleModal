@@ -1,7 +1,6 @@
 // child.js adds global event listeners
 import './child.js';
 import * as layerManager from './layerManager.js';
-import makeIframe from './makeIframe.js';
 
 // Parent window API
 export function open(url, {
@@ -10,13 +9,14 @@ export function open(url, {
     // Currently only used for testing (fake x-origin)
     // TODO - should we document? Users might want sandbox x-origin frames
     sandbox=null,
+    covering=null,
 }={}) {
     const layer = {
         sandbox: sandbox,
-        iframe: makeIframe(sandbox),
         onload: onload,
         onclose: onclose,
         promiseResolver: null,
+        covering: covering,
     }
     layerManager.open(layer, url);
 
@@ -40,8 +40,11 @@ export {
     replace,
 } from './child.js';
 
-// various functions that child window needs, but we probably won't document
 export {
+    // TODO - document
+    updatePositions,
+
+    // various functions that child window needs, but we probably won't document
     layerForWindow, 
     resolve as resolveLayer, 
     replace as replaceLayer
