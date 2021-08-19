@@ -88,7 +88,7 @@ function elements_to_lock(layer) {
         Depending on style/layout, scrollbar could be on <html>, <body>, or both.
         So we need to lock both.
     */
-    if (layer.covering) return [layer.covering]
+    if (layer.container) return [layer.container]
     return [document.documentElement, document.body];
 }
 export function init(layer) {

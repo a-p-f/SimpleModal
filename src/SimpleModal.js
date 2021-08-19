@@ -9,14 +9,14 @@ export function open(url, {
     // Currently only used for testing (fake x-origin)
     // TODO - should we document? Users might want sandbox x-origin frames
     sandbox=null,
-    covering=null,
+    container=null,
 }={}) {
     const layer = {
         sandbox: sandbox,
         onload: onload,
         onclose: onclose,
         promiseResolver: null,
-        covering: covering,
+        container: container,
     }
     layerManager.open(layer, url);
 
