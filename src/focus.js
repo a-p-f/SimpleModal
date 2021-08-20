@@ -43,7 +43,6 @@ const focusableNodeFilter = {
         return NodeFilter.FILTER_SKIP
     }
 }
-
 export function init(layer, isFirstLayer) {
     if (isFirstLayer) {
         trackDirection();
