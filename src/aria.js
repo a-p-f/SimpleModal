@@ -1,3 +1,4 @@
+// TODO - this can be simplified via utils.initPreviousSiblings and utils.releasePreviousSiblings
 function hide_element(element) {
     element._SimpleModalAriaHiddenCount = (element._SimpleModalAriaHiddenCount||0) + 1;
     if (element._SimpleModalAriaHiddenCount == 1) {

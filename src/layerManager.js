@@ -73,9 +73,11 @@ export function open(layer, src) {
     layer.iframe = iframe;
     layers.push(layer);
 
+    const isFirstLayer = layers.length == 1;
+
     scrollLocking.init(layer);
     positioning.init(layer);
-    focus.init(layer);
+    focus.init(layer, isFirstLayer);
     aria.init(layer);
 
     iframe.addEventListener('load', layerLoaded.bind(null, layer));
@@ -87,8 +89,10 @@ export function resolve(layer, value) {
     if (index==-1) throw new Error('Layer is not in layers.');
     layers.splice(index, 1);
 
+    const isLastLayer = layers.length == 0;
+
     aria.release(layer);
-    focus.release(layer);
+    focus.release(layer, isLastLayer);
     positioning.release(layer);
     scrollLocking.release(layer);
 
