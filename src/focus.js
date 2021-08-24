@@ -75,8 +75,8 @@ export function release(layer, isLastLayer) {
     if (isLastLayer) {
         document.documentElement.removeEventListener('focusin', handleFocusChange);
     }
-    layer.initialActiveElement && layer.initialActiveElement.focus();
     u.releasePreviousSiblings(layer.iframe, function(e) {
         delete e._SimpleModalSkipFocus;
     });
-}
+    layer.initialActiveElement && layer.initialActiveElement.focus();
+ }
