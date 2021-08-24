@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+
+<html style="background-color: yellow">
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<script src="/tests/SimpleModal.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js" defer></script>
+<link rel="stylesheet" type="text/css" href="/tests/styles.css">
+
+<script type="text/javascript">
+function run(button) {
+    var load = 1;
+    SimpleModal.open('modal.html', {
+        onload: function(iwindow) {
+            if (load==1) {
+                // Iframe should be focused
+                if (document.activeElement.nodeName != 'IFRAME') throw new Error();
+                load++;
+                iwindow.location.reload();
+            }
+            if (load==2) {
+                // Iframe should be focused
+                if (document.activeElement.nodeName != 'IFRAME') throw new Error();
+                load++;
+                SimpleModal.replace('modal.html');
+            }
+            if (load==3) {
+                // Iframe should be focused
+                if (document.activeElement.nodeName != 'IFRAME') throw new Error();
+                SimpleModal.closeChild()
+            }
+        },
+        onclose: function(iwindow) {
+            if (document.activeElement != button) throw new Error();
+            window.close();
+        },
+    })
+}
+</script>
+
+<button autofocus onclick="run(this)">Open Child</button>
