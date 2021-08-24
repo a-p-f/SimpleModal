@@ -1,3 +1,10 @@
+/*
+Responsible for:
+- preventing focus of "covered" elements
+- focusing layers when opened/reloaded
+- restoring focus when layers are closed
+*/
+
 import * as u from './utils.js';
 
 let active1, active2 = document.body;
@@ -48,7 +55,17 @@ export function init(layer, isFirstLayer) {
         trackDirection();
         document.documentElement.addEventListener('focusin', handleFocusChange);
     }
-    layer.initialActiveElement = document.activeElement;
+
+    if (layer.replaces) {
+        layer.initialActiveElement = layer.replaces.initialActiveElement;
+
+        // This one shouldn't change focus when it's released
+        layer.replaces.initialActiveElement = null;
+    }
+    else {
+        layer.initialActiveElement = document.activeElement;
+    }
+
     layer.iframe.focus();
     u.initPreviousSiblings(layer.iframe, function(e) {
         e._SimpleModalSkipFocus = true;
