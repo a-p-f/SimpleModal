@@ -8,6 +8,9 @@ import {isObject, getMessage, postMessage} from './utils.js';
 const layers = [];
 function makeIframe(sandbox) {
     const iframe = document.createElement('iframe');
+
+    iframe._isSimpleModalIframe = true;
+    
     const s = iframe.style;
 
     // Don't make the iframe visible until it has loaded
