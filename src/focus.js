@@ -48,6 +48,8 @@ export function init(layer, isFirstLayer) {
         trackDirection();
         document.documentElement.addEventListener('focusin', handleFocusChange);
     }
+    layer.initialActiveElement = document.activeElement;
+    layer.iframe.focus();
     u.initPreviousSiblings(layer.iframe, function(e) {
         e._SimpleModalSkipFocus = true;
     });
@@ -56,6 +58,7 @@ export function release(layer, isLastLayer) {
     if (isLastLayer) {
         document.documentElement.removeEventListener('focusin', handleFocusChange);
     }
+    layer.initialActiveElement && layer.initialActiveElement.focus();
     u.releasePreviousSiblings(layer.iframe, function(e) {
         delete e._SimpleModalSkipFocus;
     });
