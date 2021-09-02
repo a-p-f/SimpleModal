@@ -1,3 +1,6 @@
+## 2.3.0-rc
+Added `container` option to `SimpleModal.open()`
+
 ## 2.2.0
 Added support for concurrent modal windows.
 Added `SimpleModal.reload()` and `SimpleModal.replace()`.
