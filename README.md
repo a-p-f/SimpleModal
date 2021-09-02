@@ -36,6 +36,11 @@ A callback, which will be called each time a new page loads in the modal layer. 
 #### options.onclose: function(value)
 A callback, which will be called when the modal window is closed. The argument will be whatever was passed to `SimpleModal.closeChild`, or `undefined`.
 
+#### options.container: element
+Normally, the iframe is appended to `document.body`, and disables all other elements on the page (scrolling, clicks, and keyboard access). 
+
+If you specify `container`, the iframe will be appended to that element (and will always occupy the intersection of that element with the viewport). Scrolling, clicks, and keyboard access will only be blocked within that container. This allows you to, ie, leave a sidebar nav menu accessible while the "modal" is open.
+
 ### SimpleModal.closeChild([value], [then])
 If a current modal layer exists, close it. Otherwise, throw an error.
 
@@ -126,4 +131,7 @@ We provide [AlertModal.css](./extras/AlertModal.css), which you can use on your 
 Idea - with same-origin parent, window.parent holds the key prefix
 If x-origin, don't use a prefix - assume you're the topmost layer on this domain
 
-
+## TODO
+- more thorough `container` tests
+- more thorough focus blocking/restoring tests
+- ability to opt-out of tabindex/aria-hidden manipulation

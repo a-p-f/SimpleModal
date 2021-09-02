@@ -7,53 +7,38 @@ Responsible for:
 
 import * as u from './utils.js';
 
-let active1, active2 = document.body;
-function trackDirection() {
-    active1 = active2;
-    active2 = document.activeElement || document.body;
+// Fairly inclusive list of (potentially) focusable elements.
+// I used this for guidance: https://allyjs.io/data-tables/focusable.html
+const POTENTIALLY_FOCUSABLE = 'a,button,input,textarea,select,summary,[contenteditable],area,audio,video,object,embed,svg,iframe';
+
+function getPotentiallyFocusableChildren(layer) {
+    return (layer.container || document.body).querySelectorAll(POTENTIALLY_FOCUSABLE);
 }
-function focusMovedBackward() {
-    return active1.compareDocumentPosition(active2) & Node.DOCUMENT_POSITION_PRECEDING
+function block(e) {
+    // Do nothing if already blocked
+    if (e.hasOwnProperty('_SimpleModalInitialTabIndex')) return
+
+    e._SimpleModalInitialTabIndex = e.getAttribute('tabindex');
+    e.setAttribute('tabindex', -1);
 }
-function hasSkipFocusAncestor(e) {
-    while (e) {
-        if (e._SimpleModalSkipFocus) return true
-        e = e.parentElement
-    }
-}
-function handleFocusChange(e) {
-    trackDirection();
+function unblock(e) {
+    const v = e._SimpleModalInitialTabIndex;
 
-    if (!hasSkipFocusAncestor(document.activeElement)) return
+    // This element wasn't blocked by us. Leave tabindex alone.
+    if (typeof v == 'undefined') return
 
-    const backward = focusMovedBackward();
-    const walker = document.createTreeWalker(document.documentElement, NodeFilter.SHOW_ELEMENT, focusableNodeFilter);
-    walker.currentNode = document.activeElement;
-
-    const next = backward ? walker.previousNode.bind(walker) : walker.nextNode.bind(walker);
-
-    // We found (and focused!) an element while moving in the given direction
-    if (next()) return
-
-    // We didn't find anything more appropriate to focus. 
-    document.activeElement.blur();
-}
-const focusableNodeFilter = {
-    acceptNode: function(node) {
-        // reject this node and all of it's descendants
-        if (hasSkipFocusAncestor(node)) return NodeFilter.FILTER_REJECT
-
-        // Try to focus it, see if it works
-        node.focus()
-        if (node == document.activeElement) return NodeFilter.FILTER_ACCEPT
-
-        return NodeFilter.FILTER_SKIP
-    }
+    if (v == null) e.removeAttribute('tabindex');
+    else e.setAttribute('tabindex', v);
+    delete e._SimpleModalInitialTabIndex;
 }
 export function init(layer, isFirstLayer) {
-    if (isFirstLayer) {
-        trackDirection();
-        document.documentElement.addEventListener('focusin', handleFocusChange);
+    /*
+        TODO - users might not be happy to have us messing with tabindex (even if only temporarily).
+        We should offer an option to opt-out
+    */
+    const focusable = getPotentiallyFocusableChildren(layer);
+    for (let i = focusable.length - 1; i >= 0; i--) {
+        if (focusable[i] != layer.iframe) block(focusable[i]);
     }
 
     if (layer.replaces) {
@@ -67,16 +52,25 @@ export function init(layer, isFirstLayer) {
     }
 
     layer.iframe.focus();
-    u.initPreviousSiblings(layer.iframe, function(e) {
-        e._SimpleModalSkipFocus = true;
-    });
 }
-export function release(layer, isLastLayer) {
-    if (isLastLayer) {
-        document.documentElement.removeEventListener('focusin', handleFocusChange);
+function is_covered(e, excluding) {
+    let cursor = e;
+    while (cursor = cursor.nextElementSibling) {
+        if (cursor._isSimpleModalIframe && cursor != excluding) return true
     }
-    u.releasePreviousSiblings(layer.iframe, function(e) {
-        delete e._SimpleModalSkipFocus;
-    });
-    layer.initialActiveElement && layer.initialActiveElement.focus();
+    if (e.parentElement) return is_covered(e.parentElement, excluding);
+    return false;
+}
+// TODO - more efficient algorithm? Could work top-down/backwards
+// Getting it right in all scenarios (including concurrent modals, in different containers) isn't straight-forward
+// This is a bit of a brute-force approach, but it should be correct
+export function release(layer) {
+    const focusable = document.querySelectorAll(POTENTIALLY_FOCUSABLE);
+    for (let i = focusable.length - 1; i >= 0; i--) {
+        const e = focusable[i];
+        // Note - our iframe might not have been removed yet. Be sure we don't count it in the is_covered check
+        if (!is_covered(e, layer.iframe)) unblock(e);
+    }
+    const ae = layer.initialActiveElement;
+    if (ae && ae.tabIndex >= 0) ae.focus();
  }
