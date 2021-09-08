@@ -1,5 +1,4 @@
 // Responsible for putting in DOM, and positioning on screen
-
 function cover(iframe, container) {
     const rect = container.getBoundingClientRect();
     const s = iframe.style;
@@ -19,9 +18,9 @@ function cover(iframe, container) {
     ) + 'px';
 }
 
-export function init(layer) {
-    (layer.container||document.body).appendChild(layer.iframe);
-    const s = layer.iframe.style;
+export function init(element, container) {
+    (container||document.body).appendChild(element);
+    const s = element.style;
 
     s.position = 'fixed';
     s.border = 'none';
@@ -37,14 +36,13 @@ export function init(layer) {
     // In other browsers, this always seems to set z-index to the highest supported value, and should protect against future increases in that value.
     s.zIndex = 9007199254740991;
 
-    if (layer.container) {
-        layer._position = cover.bind(null, layer.iframe, layer.container);
-        layer._position();
+    if (container) {
+        const position = cover.bind(null, element, container);
+        element._simple_modal_position = position;
+        position();
 
-        // TODO - add scroll, resize listeners
-        // Listen for a custom event that users can fire
-        addEventListener('scroll', layer._position, true);
-        addEventListener('resize', layer._position);
+        addEventListener('scroll', position, true);
+        addEventListener('resize', position);
     }
     else {
         s.left = s.top = '0px';
@@ -53,16 +51,17 @@ export function init(layer) {
 }
 
 // layer manager can tell us to update explicitly
-export function update(layer) {
-    if (layer.container) {
-        layer._position();
+export function update(element, container) {
+    if (container) {
+        element._simple_modal_position();
     }
 }
 
-export function release(layer) {
-    layer.iframe.parentElement && layer.iframe.parentElement.removeChild(layer.iframe);
-    if (layer.container) {
-        removeEventListener('scroll', layer._position, true);
-        removeEventListener('resize', layer._position);
+export function release(element, container) {
+    element.parentElement && element.parentElement.removeChild(element);
+    if (container) {
+        const position = element._simple_modal_position;
+        removeEventListener('scroll', position, true);
+        removeEventListener('resize', position);
     }
 }

@@ -79,7 +79,7 @@ export function open(layer, src) {
     const isFirstLayer = layers.length == 1;
 
     scrollLocking.init(layer);
-    positioning.init(layer);
+    positioning.init(layer.iframe, layer.container);
     focus.init(layer, isFirstLayer);
     aria.init(layer);
 
@@ -96,7 +96,7 @@ export function resolve(layer, value) {
 
     aria.release(layer);
     focus.release(layer, isLastLayer);
-    positioning.release(layer);
+    positioning.release(layer.iframe, layer.container);
     scrollLocking.release(layer);
 
     layer.onclose && layer.onclose(value);
@@ -120,7 +120,7 @@ export function replace(layer, url) {
 }
 export function updatePositions() {
     for (var i = 0; i < layers.length; i++) {
-        positioning.update(layers[i]);
+        positioning.update(layers[i].iframe, layers[i].container);
     }
 }
 addEventListener('message', function(event) {
