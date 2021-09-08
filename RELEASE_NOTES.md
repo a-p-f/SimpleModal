@@ -1,3 +1,6 @@
+## 2.4.0-rc
+Added `animateOut(then)` to child window API.
+
 ## 2.3.0-rc
 Added `container` option to `SimpleModal.open()`
 
