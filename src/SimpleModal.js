@@ -38,6 +38,7 @@ export {
     close,
     reload,
     replace,
+    animateOut,
 } from './child.js';
 
 export {

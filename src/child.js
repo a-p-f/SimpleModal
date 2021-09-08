@@ -80,7 +80,7 @@ export function animateOut(then) {
     var h = document.documentElement;
     h.classList.add('SimpleModal-closing');
     h.classList.add('SimpleModal-animating');
-    after_html_animation(then);
+    if (then) after_html_animation(then);
 }
 
 function assertIframed() {
