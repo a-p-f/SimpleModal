@@ -1,3 +1,6 @@
+## 2.5.0-rc
+Added `.SimpleModalBackdrop` support.
+
 ## 2.4.0-rc
 Added `animateOut(then)` to child window API.
 
