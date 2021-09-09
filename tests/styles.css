@@ -14,7 +14,7 @@ p, .block-margin {
 }
 .SimpleModalBackdrop.closing {
     animation-direction: reverse;
-    /* make sure the offscreen state persists while window is closed */
+    /* make sure the offscreen state persists while backdrop is removed */
     animation-fill-mode: forwards;
 }
 @keyframes SimpleModalBackdrop {

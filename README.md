@@ -14,15 +14,6 @@ Think of `SimpleModal.open(url)` as an alternative to `window.open(url)`. It ope
 - add SimpleModal.js to your parent page (and optionally, to your child pages)
 - `SimpleModal` is now available globally
 
-## Other Features of Note
-
-### "Smart Background"
-If you open a same-origin document in a modal layer, and there is no `background-color` on the `<html>` element (or if it is transparent), then we'll automatically add a solid white background behind it.
-
-This is mainly to support server generated error pages (ie. 404 pages), which don't usually set an explicit background color. Without this feature, opening a modal layer to a url which returns an error page would be very confusing (the error message would display over top of your window, but having a transparent background, it would be difficult to see).
-
-Your modal pages should be sure to set an explicit, not-completely-transparent `background-color` on the `html` element. If you want a virtually transparent background, use `rgba(0,0,0,0.004)`. This is roughly equivalent to `#00000001`, which seems to be the least opaque value that is not treated as equivalent to `transparent` by any browsers (#RGBA and #RRGGBBAA hex notation are not supported in IE, so don't use `#00000001` if you're supporting IE). 
-
 ## Parent Window API
 
 ### SimpleModal.open(url, [options]) -> Promise | null
@@ -120,6 +111,40 @@ We use a custom attribute (rather than `autofocus`) because Safari seems automat
 
 Whether you use this feature or not, we recommend that you never set `autofocus` on any element inside your modal windows. 
 
+## Other Features of Note
+
+### Backdrop
+We add a div with class "SimpleModalBackdrop" behind the iframe. We add an "animating" class when we first add it, and we add "animating closing" when we're removing it (similar to our animation support in child windows).
+
+We recommend you include the following CSS on your site (or something similar):
+```css
+.SimpleModalBackdrop {
+    background-color: rgba(0,0,0,0.25);
+    pointer-events: none;
+}
+.SimpleModalBackdrop.animating {
+    animation: 0.3s ease-in SimpleModalBackdrop;
+}
+.SimpleModalBackdrop.closing {
+    animation-direction: reverse;
+    /* make sure the offscreen state persists while backdrop is removed */
+    animation-fill-mode: forwards;
+}
+@keyframes SimpleModalBackdrop {
+    0% {opacity: 0;}
+    100% {opacity: 1;}
+}
+```
+
+Note: you _could_ implement a "backdrop" just by setting a semi-transparent background color on the html element in your modal pages. However, if your modal pages are slow to load, then the user has no indication that something is happening. By adding the backdrop immediately in the parent window, the user has some feedback that something is loading.
+
+### "Smart Background"
+If you open a same-origin document in a modal layer, and there is no `background-color` on the `<html>` element (or if it is transparent), then we'll automatically add a solid white background behind it.
+
+This is mainly to support server generated error pages (ie. 404 pages), which don't usually set an explicit background color. Without this feature, opening a modal layer to a url which returns an error page would be very confusing (the error message would display over top of your window, but having a transparent background, it would be difficult to see).
+
+Your modal pages should be sure to set an explicit, not-completely-transparent `background-color` on the `html` element. If you want a virtually transparent background, use `rgba(0,0,0,0.004)`. This is roughly equivalent to `#00000001`, which seems to be the least opaque value that is not treated as equivalent to `transparent` by any browsers (#RGBA and #RRGGBBAA hex notation are not supported in IE, so don't use `#00000001` if you're supporting IE). 
+
 ## Warnings/Caveats
 We don't recommend creating any additional history entries from within the modal window. TODO: explain why.
 
@@ -143,4 +168,5 @@ If x-origin, don't use a prefix - assume you're the topmost layer on this domain
 - more thorough `container` tests
 - more thorough focus blocking/restoring tests
 - animateOut() test
+- explicit SimpleModalBackdrop test
 - ability to opt-out of tabindex/aria-hidden manipulation

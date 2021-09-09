@@ -15,3 +15,11 @@
 <button onclick="SimpleModal.close();" simple-modal-autofocus>Close</button>
 
 <div class="block-margin"></div>
+
+<script type="text/javascript">
+    // delay load event to simulate a slow page
+    var start = Date.now();
+    while(true) {
+        if (Date.now() - start > 500) break
+    }
+</script>
