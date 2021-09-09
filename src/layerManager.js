@@ -75,7 +75,7 @@ export function top() {
     // Notice - will be undefined if no layers open
     return layers[layers.length-1];
 }
-export function open(layer, src) {
+function addBackdrop(layer) {
     const backdrop = document.createElement('div');
     backdrop.classList.add('SimpleModalBackdrop');
     backdrop.classList.add('animating');
@@ -84,6 +84,10 @@ export function open(layer, src) {
         backdrop.classList.remove('animating');
     });
     layer.backdrop = backdrop;
+}
+export function open(layer, src) {
+    // If this layer is replacing another, it will already have a backdrop
+    if (!layer.backdrop) addBackdrop(layer);
 
     const iframe = makeIframe(layer.sandbox);
     layer.iframe = iframe;
@@ -125,12 +129,14 @@ export function replace(layer, url) {
         onload: layer.onload,
         onclose: layer.onclose,
         promiseResolver: layer.promiseResolver,
+        backdrop: layer.backdrop,
     }
 
     // Ensure nothing happens when remove current, or if it loads again
     layer.onload = null;
     layer.onclose = null;
     layer.promiseResolver = null;
+    layer.backdrop = null;
 
     next.replaces = layer;
     open(next, url);
