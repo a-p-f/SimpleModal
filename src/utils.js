@@ -30,3 +30,9 @@ export function releasePreviousSiblings(iframe, releaseFunction) {
         if (cursor._isSimpleModalIframe) return
     }
 }
+export function afterAnimation(element, then) {
+    setTimeout(
+        then, 
+        parseFloat(getComputedStyle(element).animationDuration)*1000,
+    );
+}

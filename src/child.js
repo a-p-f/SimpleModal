@@ -77,6 +77,7 @@ addEventListener('load', function() {
 });
 
 export function animateOut(then) {
+    postMessage(window.parent, 'ANIMATE_SIMPLE_MODAL_BACKDROP_OUT');
     var h = document.documentElement;
     h.classList.add('SimpleModal-closing');
     h.classList.add('SimpleModal-animating');

@@ -2,12 +2,16 @@ import * as aria from './aria.js';
 import * as positioning from './positioning.js';
 import * as scrollLocking from './scrollLocking.js';
 import * as focus from './focus.js';
+import * as u from './utils.js';
 
 import {isObject, getMessage, postMessage} from './utils.js';
 
 const layers = [];
 function makeIframe(sandbox) {
     const iframe = document.createElement('iframe');
+
+    // Not used by us anywhere, but can be useful for external code to identify our iframes
+    iframe.classList.add('SimpleModalIframe');
 
     iframe._isSimpleModalIframe = true;
     
@@ -72,6 +76,15 @@ export function top() {
     return layers[layers.length-1];
 }
 export function open(layer, src) {
+    const backdrop = document.createElement('div');
+    backdrop.classList.add('SimpleModalBackdrop');
+    backdrop.classList.add('animating');
+    positioning.init(backdrop, layer.container);
+    u.afterAnimation(backdrop, function() {
+        backdrop.classList.remove('animating');
+    });
+    layer.backdrop = backdrop;
+
     const iframe = makeIframe(layer.sandbox);
     layer.iframe = iframe;
     layers.push(layer);
@@ -91,6 +104,10 @@ export function resolve(layer, value) {
     const index = layers.indexOf(layer);
     if (index==-1) throw new Error('Layer is not in layers.');
     layers.splice(index, 1);
+
+    // If the layer still has a backdrop, remove it
+    const backdrop = layer.backdrop;
+    if (backdrop) removeBackdrop(backdrop, layer.container);
 
     const isLastLayer = layers.length == 0;
 
@@ -123,6 +140,20 @@ export function updatePositions() {
         positioning.update(layers[i].iframe, layers[i].container);
     }
 }
+function animateBackdropOut(layer) {
+    const backdrop = layer.backdrop;
+    if (!backdrop) return
+
+    // tell resolve not remove the backdrop - let the exit animation finish
+    layer.backdrop = null;
+
+    backdrop.classList.add('animating');
+    backdrop.classList.add('closing');
+    u.afterAnimation(backdrop, removeBackdrop.bind(null, backdrop, layer.container));
+}
+function removeBackdrop(backdrop, container) {
+    positioning.release(backdrop, container);
+}
 addEventListener('message', function(event) {
     const layer = layerForWindow(event.source);
     if (!layer) return
@@ -141,5 +172,8 @@ addEventListener('message', function(event) {
         reveal(layer.iframe);
         resolve(layer.replaces);
         layer.replaces = null;
+    }
+    if (getMessage(data) == 'ANIMATE_SIMPLE_MODAL_BACKDROP_OUT') {
+        animateBackdropOut(layer);
     }
 });
