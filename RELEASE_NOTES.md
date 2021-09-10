@@ -1,3 +1,6 @@
+## 2.5.0
+Finished testing recent features and fixed bugs.
+
 ## 2.5.0-rc
 Added `.SimpleModalBackdrop` support.
 
