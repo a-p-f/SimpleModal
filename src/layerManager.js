@@ -42,8 +42,9 @@ function should_set_opaque_background(iframe) {
     // Have to assume the users have set it properly.
     if (!is_same_origin(iframe)) return false; 
 
-    const color = getComputedStyle(iframe.contentDocument.documentElement).backgroundColor;
-    return color == 'transparent' || color == 'rgba(0, 0, 0, 0)';
+    const s = getComputedStyle(iframe.contentDocument.documentElement);
+    const bc = s.backgroundColor;
+    return (bc == 'transparent' || bc == 'rgba(0, 0, 0, 0)') && s.backgroundImage == 'none';
 }
 function layerLoaded(layer) {
     const iframe = layer.iframe;
@@ -53,16 +54,20 @@ function layerLoaded(layer) {
     iframe.style.backgroundColor = should_set_opaque_background(iframe) ? 'white' : '';
 
     if (layer.replaces) {
-        postMessage(layer.iframe.contentWindow, 'CANCEL_SIMPLE_MODAL_ANIMATIONS');
+        postMessage(iframe.contentWindow, 'CANCEL_SIMPLE_MODAL_ANIMATIONS');
         // Don't reveal until it tells us it has canceled animations
     }
     else {
         // Only needed on first load, but no harm running every load
         reveal(iframe);
     }
+
     // Seems to be needed in IE - iframe blurs when it reloads
     // We want to be sure to focus it now, before we call the onload callback (rather than waiting for our focus listener)
-    if (iframe != document.activeElement) iframe.focus();
+    if (iframe != document.activeElement && iframe.tabindex != -1) {
+        iframe.focus();
+    }
+    postMessage(iframe.contentWindow, 'SIMPLE_MODAL_LOADED_AND_REFOCUSED');
 
     layer.onload && layer.onload(layer.iframe.contentWindow);
 }
@@ -123,7 +128,7 @@ export function resolve(layer, value) {
     layer.onclose && layer.onclose(value);
     layer.promiseResolver && layer.promiseResolver(value);
 }
-export function replace(layer, url) {
+export function replace(layer, url, animated=false) {
     const next = {
         sandbox: layer.sandbox,
         onload: layer.onload,
@@ -138,8 +143,16 @@ export function replace(layer, url) {
     layer.promiseResolver = null;
     layer.backdrop = null;
 
-    next.replaces = layer;
-    open(next, url);
+    if (animated) {
+        // Close current layer, opening the next one after exit animation runs
+        layer.onclose = open.bind(null, next, url);
+        resolve(layer);
+    }
+    else {
+        // Open the next layer, and have it replace the current one without animation once loaded
+        next.replaces = layer;
+        open(next, url);
+    }
 }
 export function updatePositions() {
     for (var i = 0; i < layers.length; i++) {
@@ -172,7 +185,7 @@ addEventListener('message', function(event) {
         closeChild(event.data.value);
     }
     if (getMessage(data) == 'REPLACE_SIMPLE_MODAL') {
-        replace(layer, data.url);
+        replace(layer, data.url, data.animated);
     }
     if (getMessage(data) == 'SIMPLE_MODAL_ANIMATIONS_CANCELED') {
         reveal(layer.iframe);

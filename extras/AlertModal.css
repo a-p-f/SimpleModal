@@ -34,15 +34,21 @@ html {
     overflow: hidden;
 
     /* 
-        We MUST set a background color other than transparent, or body background-color (which is probably solid) will be treated as if applied to this element 
+        We MUST set a background (color or image) other than transparent, or body background-color will be treated as if applied to this element 
 
         That's just a weird quirk of the CSS spec 
+
         Minimum possible opacity: #00000001
         But that format isn't supported by IE, so use:
         rgba(0,0,0,0.04)
     */
-    background-color: rgba(0,0,0,0.04);
+    /*background-color: rgba(0,0,0,0.04);*/
+    /*
+        Note - even better - use a completely transparent 1x1 GIF, encoded as data uri
+    */
+    background: url("data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==);");
 }
+
 body {
     margin: 0 !important;
 

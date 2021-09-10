@@ -60,7 +60,7 @@ Will throw an error if this window is either not in an iframe, or the parent is 
 If there is a parent window, and that parent is x-origin, we can't be sure whether or not we are a SimpleModal child. In this case, we ask the parent to close us (via `postMessage` api). If we are not actually a SimpleModal child, nothing will happen.
 
 ### SimpleModal.reload() / SimpleModal.replace(url)
-These behave much like calling `location.reload()` or `location.replace(url)` would inside the modal window. However, we actually create a new iframe and repalce the current one, ensuring that there is no "iframe flicker" (which seems to happen consistently in Chrome when navigating an iframe).
+These behave much like calling `location.reload()` or `location.replace(url)` from inside the modal window. However, we actually create a new iframe and repalce the current one, ensuring that there is no "iframe flicker" (which seems to happen consistently in Chrome when navigating an iframe).
 
 Also, if you're using our animation support, these methods ensure that the entrance animation does _not_ run again.
 
@@ -68,11 +68,9 @@ Note that unlike `location.reload()`, `SimpleModal.reload()` is not able to pers
 
 ### SimpleModal.animateOut([then])
 
+DEPRECATED. `SimpleModal.close()` and `SimpleModal.replace(next_url, {animated: true})` should cover all the use cases for triggering exit animations.
+
 Read the "Animation Support" section. This function triggers the "exit animation", just as if you had animation support enabled and called `SimpleModal.close()`. 
-
-If you supply a "then" callback, it will be called after the exit animation completes.
-
-This function won't usually be necessary, but can be useful if you need to run the exit animation before you want to close the modal layer.
 
 ## Opt-in Features
 A few features are opt-in. You opt-in by setting the `simple-modal-config` attribute on the `<html>` element appropriately. The value should be a space-separated list of keywords. Ie. use `<html simple-modal-config="animate autofocus">` to enable animations and autofocus support.
@@ -167,6 +165,4 @@ If x-origin, don't use a prefix - assume you're the topmost layer on this domain
 ## TODO
 - more thorough `container` tests
 - more thorough focus blocking/restoring tests
-- animateOut() test
-- explicit SimpleModalBackdrop test
 - ability to opt-out of tabindex/aria-hidden manipulation
