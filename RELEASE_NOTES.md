@@ -1,3 +1,15 @@
+## 2.5.0
+Finished testing recent features and fixed bugs.
+
+## 2.5.0-rc
+Added `.SimpleModalBackdrop` support.
+
+## 2.4.0-rc
+Added `animateOut(then)` to child window API.
+
+## 2.3.0-rc
+Added `container` option to `SimpleModal.open()`
+
 ## 2.2.0
 Added support for concurrent modal windows.
 Added `SimpleModal.reload()` and `SimpleModal.replace()`.

@@ -1,6 +1,8 @@
 import config from './config.js';
 import {isObject, getMessage, postMessage} from './utils.js';
 
+let ae = document.activeElement;
+
 // Listen to messages from parent
 if (window.parent != window) {
     addEventListener('message', function(event) {
@@ -13,12 +15,32 @@ if (window.parent != window) {
             }
             postMessage(window.parent, 'SIMPLE_MODAL_ANIMATIONS_CANCELED');
         }
-    });   
+        if (getMessage(data) == 'SIMPLE_MODAL_LOADED_AND_REFOCUSED') {
+            // If we're animating this window, don't autofocus until animation done
+            if (config.autofocus && !config.animate) autofocus();
+        }
+    });
+    trackAndRestoreFocus();
+}
+
+function trackAndRestoreFocus() {
+    // track active element within this iframe
+    document.documentElement.addEventListener('focus', function() {
+        ae = document.activeElement;
+    }, true);
+
+    // when iframe regains focus, re-focus the correct element
+    addEventListener('focus', function() {
+        ae && ae.focus();
+    });
 }
 
 export function autofocus() {
     const target = document.querySelector('[simple-modal-autofocus]');
-    target && target.focus();
+    if (target) {
+        target.focus();
+        ae = target;
+    }
 }
 
 function after_html_animation(callback) {
@@ -62,11 +84,13 @@ addEventListener('load', function() {
     }
 });
 
-export function animateOut(then) {
+export function animateOut(then, {leaveBackdrop=false}={}) {
+    if (!leaveBackdrop) postMessage(parent, 'ANIMATE_SIMPLE_MODAL_BACKDROP_OUT');
+
     var h = document.documentElement;
     h.classList.add('SimpleModal-closing');
     h.classList.add('SimpleModal-animating');
-    after_html_animation(then);
+    if (then) after_html_animation(then);
 }
 
 function assertIframed() {
@@ -129,11 +153,20 @@ export function close(value=null, then=null) {
         do_close();
     }
 }
-export function replace(url) {
-    parent.postMessage({
-        message: 'REPLACE_SIMPLE_MODAL',
-        url: url,
-    }, '*');
+export function replace(url, {animated=false}={}) {
+    function do_replace() {
+        parent.postMessage({
+            message: 'REPLACE_SIMPLE_MODAL',
+            url: url,
+            animated: animated,
+        }, '*');
+    }
+    if (animated) {
+        animateOut(do_replace, {leaveBackdrop: true});
+    }
+    else {
+        do_replace();
+    }
 }
 export function reload() {
     replace(location.href);

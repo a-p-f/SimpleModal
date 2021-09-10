@@ -14,15 +14,6 @@ Think of `SimpleModal.open(url)` as an alternative to `window.open(url)`. It ope
 - add SimpleModal.js to your parent page (and optionally, to your child pages)
 - `SimpleModal` is now available globally
 
-## Other Features of Note
-
-### "Smart Background"
-If you open a same-origin document in a modal layer, and there is no `background-color` on the `<html>` element (or if it is transparent), then we'll automatically add a solid white background behind it.
-
-This is mainly to support server generated error pages (ie. 404 pages), which don't usually set an explicit background color. Without this feature, opening a modal layer to a url which returns an error page would be very confusing (the error message would display over top of your window, but having a transparent background, it would be difficult to see).
-
-Your modal pages should be sure to set an explicit, not-completely-transparent `background-color` on the `html` element. If you want a virtually transparent background, use `rgba(0,0,0,0.004)`. This is roughly equivalent to `#00000001`, which seems to be the least opaque value that is not treated as equivalent to `transparent` by any browsers (#RGBA and #RRGGBBAA hex notation are not supported in IE, so don't use `#00000001` if you're supporting IE). 
-
 ## Parent Window API
 
 ### SimpleModal.open(url, [options]) -> Promise | null
@@ -35,6 +26,11 @@ A callback, which will be called each time a new page loads in the modal layer. 
 
 #### options.onclose: function(value)
 A callback, which will be called when the modal window is closed. The argument will be whatever was passed to `SimpleModal.closeChild`, or `undefined`.
+
+#### options.container: element
+Normally, the iframe is appended to `document.body`, and disables all other elements on the page (scrolling, clicks, and keyboard access). 
+
+If you specify `container`, the iframe will be appended to that element (and will always occupy the intersection of that element with the viewport). Scrolling, clicks, and keyboard access will only be blocked within that container. This allows you to, ie, leave a sidebar nav menu accessible while the "modal" is open.
 
 ### SimpleModal.closeChild([value], [then])
 If a current modal layer exists, close it. Otherwise, throw an error.
@@ -64,11 +60,17 @@ Will throw an error if this window is either not in an iframe, or the parent is 
 If there is a parent window, and that parent is x-origin, we can't be sure whether or not we are a SimpleModal child. In this case, we ask the parent to close us (via `postMessage` api). If we are not actually a SimpleModal child, nothing will happen.
 
 ### SimpleModal.reload() / SimpleModal.replace(url)
-These behave much like calling `location.reload()` or `location.replace(url)` would inside the modal window. However, we actually create a new iframe and repalce the current one, ensuring that there is no "iframe flicker" (which seems to happen consistently in Chrome when navigating an iframe).
+These behave much like calling `location.reload()` or `location.replace(url)` from inside the modal window. However, we actually create a new iframe and repalce the current one, ensuring that there is no "iframe flicker" (which seems to happen consistently in Chrome when navigating an iframe).
 
 Also, if you're using our animation support, these methods ensure that the entrance animation does _not_ run again.
 
 Note that unlike `location.reload()`, `SimpleModal.reload()` is not able to persist `history.state` or scroll position.
+
+### SimpleModal.animateOut([then])
+
+DEPRECATED. `SimpleModal.close()` and `SimpleModal.replace(next_url, {animated: true})` should cover all the use cases for triggering exit animations.
+
+Read the "Animation Support" section. This function triggers the "exit animation", just as if you had animation support enabled and called `SimpleModal.close()`. 
 
 ## Opt-in Features
 A few features are opt-in. You opt-in by setting the `simple-modal-config` attribute on the `<html>` element appropriately. The value should be a space-separated list of keywords. Ie. use `<html simple-modal-config="animate autofocus">` to enable animations and autofocus support.
@@ -107,6 +109,40 @@ We use a custom attribute (rather than `autofocus`) because Safari seems automat
 
 Whether you use this feature or not, we recommend that you never set `autofocus` on any element inside your modal windows. 
 
+## Other Features of Note
+
+### Backdrop
+We add a div with class "SimpleModalBackdrop" behind the iframe. We add an "animating" class when we first add it, and we add "animating closing" when we're removing it (similar to our animation support in child windows).
+
+We recommend you include the following CSS on your site (or something similar):
+```css
+.SimpleModalBackdrop {
+    background-color: rgba(0,0,0,0.25);
+    pointer-events: none;
+}
+.SimpleModalBackdrop.animating {
+    animation: 0.3s ease-in SimpleModalBackdrop;
+}
+.SimpleModalBackdrop.closing {
+    animation-direction: reverse;
+    /* make sure the offscreen state persists while backdrop is removed */
+    animation-fill-mode: forwards;
+}
+@keyframes SimpleModalBackdrop {
+    0% {opacity: 0;}
+    100% {opacity: 1;}
+}
+```
+
+Note: you _could_ implement a "backdrop" just by setting a semi-transparent background color on the html element in your modal pages. However, if your modal pages are slow to load, then the user has no indication that something is happening. By adding the backdrop immediately in the parent window, the user has some feedback that something is loading.
+
+### "Smart Background"
+If you open a same-origin document in a modal layer, and there is no `background-color` on the `<html>` element (or if it is transparent), then we'll automatically add a solid white background behind it.
+
+This is mainly to support server generated error pages (ie. 404 pages), which don't usually set an explicit background color. Without this feature, opening a modal layer to a url which returns an error page would be very confusing (the error message would display over top of your window, but having a transparent background, it would be difficult to see).
+
+Your modal pages should be sure to set an explicit, not-completely-transparent `background-color` on the `html` element. If you want a virtually transparent background, use `rgba(0,0,0,0.004)`. This is roughly equivalent to `#00000001`, which seems to be the least opaque value that is not treated as equivalent to `transparent` by any browsers (#RGBA and #RRGGBBAA hex notation are not supported in IE, so don't use `#00000001` if you're supporting IE). 
+
 ## Warnings/Caveats
 We don't recommend creating any additional history entries from within the modal window. TODO: explain why.
 
@@ -126,4 +162,7 @@ We provide [AlertModal.css](./extras/AlertModal.css), which you can use on your 
 Idea - with same-origin parent, window.parent holds the key prefix
 If x-origin, don't use a prefix - assume you're the topmost layer on this domain
 
-
+## TODO
+- more thorough `container` tests
+- more thorough focus blocking/restoring tests
+- ability to opt-out of tabindex/aria-hidden manipulation

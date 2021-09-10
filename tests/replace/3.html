@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 
-<html simple-modal-config='autofocus'>
+<html simple-modal-config="autofocus animate">
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>onload</title>
+<title></title>
 <script src="/tests/SimpleModal.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js" defer></script>
 <link rel="stylesheet" type="text/css" href="/tests/styles.css">
+<link rel="stylesheet" type="text/css" href="/extras/AlertModal.css">
 
-<p>Reload this modal, and ensure the the alert appears again. <button onclick='location.reload();' simple-modal-autofocus>Reload</button></p>
 
-<p><button onclick='window.parent.close()'>Done</button></p>
+<p>Ensure that the button is auto-focused when this page loads.<button simple-modal-autofocus onclick="SimpleModal.close(5);">Done!</button></p>

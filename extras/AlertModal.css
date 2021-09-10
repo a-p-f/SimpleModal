@@ -34,27 +34,21 @@ html {
     overflow: hidden;
 
     /* 
-        We MUST set a background color other than transparent, or body background-color (which is probably solid) will be treated as if applied to this element 
+        We MUST set a background (color or image) other than transparent, or body background-color will be treated as if applied to this element 
 
         That's just a weird quirk of the CSS spec 
+
         Minimum possible opacity: #00000001
         But that format isn't supported by IE, so use:
         rgba(0,0,0,0.04)
     */
-    background-color: rgba(0,0,0,0.04);
+    /*background-color: rgba(0,0,0,0.04);*/
+    /*
+        Note - even better - use a completely transparent 1x1 GIF, encoded as data uri
+    */
+    background: url("data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==);");
 }
-/*
-    Note - two reasons to use pseudo element for backdrop, rather than setting on <html>
-    - Firefox seems to have issues reverse animating <html>
-    - allows us to animate opacity, which may be more efficient than animating background color
-*/
-html:before {
-    content: '';
-    position: absolute;
-    top: 0;left: 0;width: 100%;height: 100%;
-    z-index: -1;
-    background-color: rgba(0,0,0,0.25);
-}
+
 body {
     margin: 0 !important;
 
@@ -98,10 +92,6 @@ body {
     Animation styles
     Note - keyframes at 100% _shouldn't_ be needed if they're the same as the "default" values, but we've run into weird browser behaviour where animations sometimes break if they aren't set. Best to always set them explicitly.
 */
-@keyframes SimpleModal-fade-in {
-    0% {opacity: 0;}
-    100% {opacity: 1;}
-}
 @keyframes SimpleModal-explode {
     0% {transform: scale(0);}
     100% {transform: none;}
@@ -110,17 +100,14 @@ body {
     0% {transform: translateY(-100%);}
     100% {transform: none;}
 }
-html, body, html:before {
+html, body {
     animation-duration: 0.3s;
     animation-timing-function: ease-in;
-}
-.SimpleModal-animating:before {
-    animation-name: SimpleModal-fade-in;
 }
 .SimpleModal-animating body {
     animation-name: SimpleModal-explode;
 }
-.SimpleModal-closing:before, .SimpleModal-closing body {
+.SimpleModal-closing body {
     animation-direction: reverse;
     /* make sure the offscreen state persists while window is closed */
     animation-fill-mode: forwards;

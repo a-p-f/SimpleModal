@@ -1,6 +1,6 @@
 {
   "name": "SimpleModal",
-  "version": "2.2.0",
+  "version": "2.5.0",
   "description": "A modal version of window.open()",
   "scripts": {
     "start": "rollup -c rollup.config.js --watch",

@@ -1,10 +1,37 @@
-import makeIframe from './makeIframe.js';
-import {lockScroll, releaseScroll} from './lockScroll.js';
+import * as aria from './aria.js';
+import * as positioning from './positioning.js';
+import * as scrollLocking from './scrollLocking.js';
+import * as focus from './focus.js';
+import * as u from './utils.js';
+
 import {isObject, getMessage, postMessage} from './utils.js';
 
 const layers = [];
-let initialActiveElement;
+function makeIframe(sandbox) {
+    const iframe = document.createElement('iframe');
 
+    // Not used by us anywhere, but can be useful for external code to identify our iframes
+    iframe.classList.add('SimpleModalIframe');
+
+    iframe._isSimpleModalIframe = true;
+    
+    const s = iframe.style;
+
+    // Don't make the iframe visible until it has loaded
+    // This makes it easier to animate in
+    // Use opacity, rather than visibility, because browser don't let you focus hidden elements
+    // May be more performant to toggle opacity, too
+    // s.visibility = 'hidden';
+    s.opacity = 0;
+
+    if (sandbox !== null) {
+        iframe.setAttribute('sandbox', sandbox);
+    }
+    return iframe;
+}
+function reveal(iframe) {
+    iframe.style.opacity = '';
+}
 function is_same_origin(iframe) {
     try {
         return Boolean(iframe.contentDocument);
@@ -15,8 +42,9 @@ function should_set_opaque_background(iframe) {
     // Have to assume the users have set it properly.
     if (!is_same_origin(iframe)) return false; 
 
-    const color = getComputedStyle(iframe.contentDocument.documentElement).backgroundColor;
-    return color == 'transparent' || color == 'rgba(0, 0, 0, 0)';
+    const s = getComputedStyle(iframe.contentDocument.documentElement);
+    const bc = s.backgroundColor;
+    return (bc == 'transparent' || bc == 'rgba(0, 0, 0, 0)') && s.backgroundImage == 'none';
 }
 function layerLoaded(layer) {
     const iframe = layer.iframe;
@@ -26,29 +54,22 @@ function layerLoaded(layer) {
     iframe.style.backgroundColor = should_set_opaque_background(iframe) ? 'white' : '';
 
     if (layer.replaces) {
-        postMessage(layer.iframe.contentWindow, 'CANCEL_SIMPLE_MODAL_ANIMATIONS');
+        postMessage(iframe.contentWindow, 'CANCEL_SIMPLE_MODAL_ANIMATIONS');
         // Don't reveal until it tells us it has canceled animations
     }
     else {
         // Only needed on first load, but no harm running every load
-        layer.iframe.style.opacity = '';        
+        reveal(iframe);
     }
+
     // Seems to be needed in IE - iframe blurs when it reloads
-    // We want to be sure to run it now, before we call the onload callback (rather than waiting for our focus listener)
-    focusTopIfNeeded();
+    // We want to be sure to focus it now, before we call the onload callback (rather than waiting for our focus listener)
+    if (iframe != document.activeElement && iframe.tabindex != -1) {
+        iframe.focus();
+    }
+    postMessage(iframe.contentWindow, 'SIMPLE_MODAL_LOADED_AND_REFOCUSED');
 
     layer.onload && layer.onload(layer.iframe.contentWindow);
-}
-function getActiveElement() {
-    let c = document.activeElement;
-    // If the activeElement is an iframe, try to descend into the iframe
-    // If we reach a cross-origin iframe, error will be thrown
-    try {
-        while (c && c.contentDocument && c.contentDocument.activeElement) {
-            c = c.contentDocument.activeElement;
-        }
-    } catch(e) {}
-    return c;
 }
 export function layerForWindow(w) {
     for (let i = 0; i < layers.length; i++) {
@@ -59,17 +80,32 @@ export function top() {
     // Notice - will be undefined if no layers open
     return layers[layers.length-1];
 }
-export function open(layer, src, {animate=true}={}) {
-    if (layers.length == 0) {
-        initialActiveElement = getActiveElement();
-        lockScroll();
-        attachGlobalListeners();
-    }
+function addBackdrop(layer) {
+    const backdrop = document.createElement('div');
+    backdrop.classList.add('SimpleModalBackdrop');
+    backdrop.classList.add('animating');
+    positioning.init(backdrop, layer.container);
+    u.afterAnimation(backdrop, function() {
+        backdrop.classList.remove('animating');
+    });
+    layer.backdrop = backdrop;
+}
+export function open(layer, src) {
+    // If this layer is replacing another, it will already have a backdrop
+    if (!layer.backdrop) addBackdrop(layer);
+
+    const iframe = makeIframe(layer.sandbox);
+    layer.iframe = iframe;
     layers.push(layer);
-    const iframe = layer.iframe;
-    document.body.appendChild(iframe);
+
+    const isFirstLayer = layers.length == 1;
+
+    scrollLocking.init(layer);
+    positioning.init(layer.iframe, layer.container);
+    focus.init(layer, isFirstLayer);
+    aria.init(layer);
+
     iframe.addEventListener('load', layerLoaded.bind(null, layer));
-    iframe.focus();
     iframe.src = src;
 }
 export function resolve(layer, value) {
@@ -78,49 +114,66 @@ export function resolve(layer, value) {
     if (index==-1) throw new Error('Layer is not in layers.');
     layers.splice(index, 1);
 
-    layer.iframe.parentElement && layer.iframe.parentElement.removeChild(layer.iframe);
-    if (layers.length == 0) {
-        releaseScroll();
-        initialActiveElement && initialActiveElement.focus();
-        detachGlobalListeners();
-    }
-    else {
-        focusTopIfNeeded();
-    }
+    // If the layer still has a backdrop, remove it
+    const backdrop = layer.backdrop;
+    if (backdrop) removeBackdrop(backdrop, layer.container);
+
+    const isLastLayer = layers.length == 0;
+
+    aria.release(layer);
+    focus.release(layer, isLastLayer);
+    positioning.release(layer.iframe, layer.container);
+    scrollLocking.release(layer);
+
     layer.onclose && layer.onclose(value);
     layer.promiseResolver && layer.promiseResolver(value);
 }
-export function replace(layer, url) {
+export function replace(layer, url, animated=false) {
     const next = {
         sandbox: layer.sandbox,
-        iframe: makeIframe(layer.sandbox),
         onload: layer.onload,
         onclose: layer.onclose,
         promiseResolver: layer.promiseResolver,
+        backdrop: layer.backdrop,
     }
 
     // Ensure nothing happens when remove current, or if it loads again
     layer.onload = null;
     layer.onclose = null;
     layer.promiseResolver = null;
+    layer.backdrop = null;
 
-    next.replaces = layer;
-    open(next, url, {animate: false});
+    if (animated) {
+        // Close current layer, opening the next one after exit animation runs
+        layer.onclose = open.bind(null, next, url);
+        resolve(layer);
+    }
+    else {
+        // Open the next layer, and have it replace the current one without animation once loaded
+        next.replaces = layer;
+        open(next, url);
+    }
 }
-function attachGlobalListeners() {
-    document.documentElement.addEventListener('focus', focusTopIfNeeded, true);
-    addEventListener('message', handleChildMessages);
+export function updatePositions() {
+    for (var i = 0; i < layers.length; i++) {
+        positioning.update(layers[i].iframe, layers[i].container);
+    }
 }
-function detachGlobalListeners() {
-    document.documentElement.removeEventListener('focus', focusTopIfNeeded, true);
-    removeEventListener('message', handleChildMessages);
+function animateBackdropOut(layer) {
+    const backdrop = layer.backdrop;
+    if (!backdrop) return
+
+    // tell resolve not remove the backdrop - let the exit animation finish
+    layer.backdrop = null;
+
+    backdrop.classList.add('animating');
+    backdrop.classList.add('closing');
+    u.afterAnimation(backdrop, removeBackdrop.bind(null, backdrop, layer.container));
 }
-// TODO - play nice with other "dynamic overlays" - if focus moved to an element after iframe in DOM, then do nothing
-function focusTopIfNeeded() {
-    const layer = top();
-    if (layer && layer.iframe != document.activeElement) layer.iframe.focus();
+function removeBackdrop(backdrop, container) {
+    positioning.release(backdrop, container);
 }
-function handleChildMessages() {
+addEventListener('message', function(event) {
     const layer = layerForWindow(event.source);
     if (!layer) return
     
@@ -132,11 +185,14 @@ function handleChildMessages() {
         closeChild(event.data.value);
     }
     if (getMessage(data) == 'REPLACE_SIMPLE_MODAL') {
-        replace(layer, data.url);
+        replace(layer, data.url, data.animated);
     }
     if (getMessage(data) == 'SIMPLE_MODAL_ANIMATIONS_CANCELED') {
-        layer.iframe.style.opacity = '';
+        reveal(layer.iframe);
         resolve(layer.replaces);
         layer.replaces = null;
     }
-}
+    if (getMessage(data) == 'ANIMATE_SIMPLE_MODAL_BACKDROP_OUT') {
+        animateBackdropOut(layer);
+    }
+});
