@@ -46,7 +46,7 @@ html {
     /*
         Note - even better - use a completely transparent 1x1 GIF, encoded as data uri
     */
-    background: url("data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==);");
+    background: url("data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==");
 }
 
 body {
