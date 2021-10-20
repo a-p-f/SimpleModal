@@ -1,3 +1,6 @@
+### 2.5.2
+Document that `then` callback support is broken
+
 ### 2.5.1
 Fixed relative url handling in replace()
 
