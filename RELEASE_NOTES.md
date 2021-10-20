@@ -1,3 +1,6 @@
+### 2.5.1
+Fixed relative url handling in replace()
+
 ## 2.5.0
 Finished testing recent features and fixed bugs.
 
