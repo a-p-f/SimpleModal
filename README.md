@@ -37,6 +37,7 @@ If a current modal layer exists, close it. Otherwise, throw an error.
 
 `value`: will be passed to the `onclose` callback that was specified when the modal layer was opened.
 
+BROKEN FEATURE (TODO - fix this):
 `then`: if specified, this callback will be called after the modal has finished closing. It will be passed the parent window as its sole argument. The main purpose of this callback is so that the child window can close itself, and then cause the parent to take some action after it is fully closed (ie. open another modal, navigate to another page, etc).
 
 Note - generally, the child will dismiss itself. Our recommended approach is not to call this method directly. Rather, we recommend including SimpleModal.js in the child window, and calling `SimpleModal.close()` from the child window.
@@ -54,6 +55,8 @@ Note - you must include SimpleModal.js in the child window for this to be availa
 Essentially, this just calls `window.parent.SimpleModal.closeChild(value, then)`.
 
 If the parent is x-origin, `value` must be serializable (since it will be passed to parent via `postMessage`) and `then` is not supported at all.
+
+NOTE - `then` support is currently broken (at least in some browsers)! TODO - fix it
 
 Will throw an error if this window is either not in an iframe, or the parent is same-origin but this window is not a SimpleModal child.
 
