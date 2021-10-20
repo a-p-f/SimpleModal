@@ -66,6 +66,8 @@ Also, if you're using our animation support, these methods ensure that the entra
 
 Note that unlike `location.reload()`, `SimpleModal.reload()` is not able to persist `history.state` or scroll position.
 
+TODO - document "animated" option to replace
+
 ### SimpleModal.animateOut([then])
 
 DEPRECATED. `SimpleModal.close()` and `SimpleModal.replace(next_url, {animated: true})` should cover all the use cases for triggering exit animations.
@@ -158,7 +160,7 @@ We provide [AlertModal.css](./extras/AlertModal.css), which you can use on your 
 
 ### SimpleModal.isChild() -> Boolean
 
-### SimpleModal.storage 
+### SimpleModal.storage
 Idea - with same-origin parent, window.parent holds the key prefix
 If x-origin, don't use a prefix - assume you're the topmost layer on this domain
 

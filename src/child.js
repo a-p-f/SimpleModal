@@ -1,5 +1,5 @@
 import config from './config.js';
-import {isObject, getMessage, postMessage} from './utils.js';
+import {isObject, getMessage, postMessage, resolve} from './utils.js';
 
 let ae = document.activeElement;
 
@@ -154,6 +154,9 @@ export function close(value=null, then=null) {
     }
 }
 export function replace(url, {animated=false}={}) {
+    // Be sure to resolve urls relative to the child location, not the parent
+    url = resolve(url);
+
     function do_replace() {
         parent.postMessage({
             message: 'REPLACE_SIMPLE_MODAL',

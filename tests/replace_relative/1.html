@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+
+<html simple-modal-config="autofocus animate">
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<script src="/tests/SimpleModal.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js" defer></script>
+<link rel="stylesheet" type="text/css" href="/tests/styles.css">
+<link rel="stylesheet" type="text/css" href="/extras/AlertModal.css">
+
+<p>Child window</p>
+
+<script>
+    // Note - here we're making sure that replace() resolves url relative to child location, not parent
+    // The replace() should load this same page, with a new querystring (not the parent page)
+    addEventListener('load', function() {
+        if (location.search == '') {
+            SimpleModal.replace('?foo');
+        }
+        if (location.search == '?foo') {
+            SimpleModal.close(true);
+        }
+    });
+</script>

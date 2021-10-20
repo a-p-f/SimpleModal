@@ -36,3 +36,8 @@ export function afterAnimation(element, then) {
         parseFloat(getComputedStyle(element).animationDuration)*1000,
     );
 }
+export function resolve(url) {
+    const a = document.createElement('a');
+    a.href = url;
+    return a.href;
+}
