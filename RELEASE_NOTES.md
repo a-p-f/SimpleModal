@@ -1,3 +1,6 @@
+## 2.6.0
+Add simplemodal-load event
+
 ### 2.5.2
 Document that `then` callback support is broken
 
