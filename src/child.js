@@ -35,6 +35,19 @@ function trackAndRestoreFocus() {
     });
 }
 
+function custom_event(name, params) {
+    // Modern browsers
+    if ( typeof window.CustomEvent === "function" ) return new CustomEvent(name, params);
+    // IE 9+ support
+    params = params || { bubbles: false, cancelable: false, detail: undefined };
+    var event = document.createEvent('CustomEvent');
+    event.initCustomEvent(name, params.bubbles, params.cancelable, params.detail);
+    return event;
+}
+function fire_load() {
+    window.dispatchEvent(custom_event('simplemodal-load'));
+}
+
 export function autofocus() {
     const target = document.querySelector('[simple-modal-autofocus]');
     if (target) {
@@ -77,10 +90,12 @@ addEventListener('load', function() {
         h.classList.add('SimpleModal-animating');
         after_html_animation(function() {
             cancel_animations();
+            fire_load();
         });
     }
     else {
         config.autofocus && autofocus();
+        fire_load();
     }
 });
 

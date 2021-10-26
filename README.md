@@ -114,6 +114,14 @@ We use a custom attribute (rather than `autofocus`) because Safari seems automat
 
 Whether you use this feature or not, we recommend that you never set `autofocus` on any element inside your modal windows. 
 
+## Events
+
+### simplemodal-load
+
+Requires SimpleModal.js to be included in the child window.
+
+This event is dispatched on child windows after animations have completed. If not using animations, it is fired immediately after the `load` event.
+
 ## Other Features of Note
 
 ### Backdrop
