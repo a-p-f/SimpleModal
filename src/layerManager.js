@@ -134,6 +134,7 @@ export function replace(layer, url, animated=false) {
         onload: layer.onload,
         onclose: layer.onclose,
         promiseResolver: layer.promiseResolver,
+        container: layer.container,
         backdrop: layer.backdrop,
     }
 

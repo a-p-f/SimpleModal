@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html simple-modal-config="animate autofocus">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<script src="/tests/SimpleModal.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js" defer></script>
+<link rel="stylesheet" type="text/css" href="/tests/styles.css">
+<link rel="stylesheet" type="text/css" href="/extras/AlertModal.css">
+
+<p>
+    <button simple-modal-autofocus onclick="SimpleModal.reload()">Reload this modal.</button>
+</p>
+
+<p>Ensure that the timestamp updates, and that the modal remains inside the container element.</p>
+
+<p>
+    <button onclick="window.parent.close();">Done</button>
+</p>
+
+<p>Renderderd at: <output></output></p>
+<script>document.querySelector('output').innerText = Date.now();</script>

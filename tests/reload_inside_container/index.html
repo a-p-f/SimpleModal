@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+
+<html style="background-color: yellow">
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<script src="/tests/SimpleModal.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js" defer></script>
+<link rel="stylesheet" type="text/css" href="/tests/styles.css">
+
+<div id="container" style="width: 50vw; height: 50vh; background-color: #ddd; border: 1px solid black;">
+    <button autofocus onclick="SimpleModal.open('modal.html', {container: document.getElementById('container')})">Open Child</button>
+</div>
