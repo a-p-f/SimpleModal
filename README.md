@@ -62,14 +62,14 @@ Will throw an error if this window is either not in an iframe, or the parent is 
 
 If there is a parent window, and that parent is x-origin, we can't be sure whether or not we are a SimpleModal child. In this case, we ask the parent to close us (via `postMessage` api). If we are not actually a SimpleModal child, nothing will happen.
 
-### SimpleModal.reload() / SimpleModal.replace(url)
+### SimpleModal.reload() / SimpleModal.replace(url, {animated=False}={})
 These behave much like calling `location.reload()` or `location.replace(url)` from inside the modal window. However, we actually create a new iframe and repalce the current one, ensuring that there is no "iframe flicker" (which seems to happen consistently in Chrome when navigating an iframe).
 
 Also, if you're using our animation support, these methods ensure that the entrance animation does _not_ run again.
 
-Note that unlike `location.reload()`, `SimpleModal.reload()` is not able to persist `history.state` or scroll position.
+If you pass `{animated: True}` to `replace`, then the exit/entrance animations _will_ be run (but the backdrop will persist).
 
-TODO - document "animated" option to replace
+Note that unlike `location.reload()`, `SimpleModal.reload()` is not able to persist `history.state` or scroll position.
 
 ### SimpleModal.animateOut([then])
 
