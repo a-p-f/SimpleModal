@@ -1,3 +1,6 @@
+### 2.6.1
+Bug fix when using `replace()` inside a modal with `container` set
+
 ## 2.6.0
 Add simplemodal-load event
 
