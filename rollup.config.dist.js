@@ -15,7 +15,7 @@ export default [
     input: 'src/SimpleModal.js',
     output: {
       banner,
-      file: `dist/SimpleModal.js`,
+      file: `dist/SimpleModal.min.js`,
       format: 'iife',
       name: 'SimpleModal',
       sourcemap: false,
@@ -23,6 +23,18 @@ export default [
     plugins: [
       babel(), 
       terser({})
+    ],
+  },
+  {
+    input: 'src/SimpleModal.js',
+    output: {
+      file: 'dist/SimpleModal.js',
+      format: 'iife',
+      name: 'SimpleModal',
+      sourcemap: true,
+    },
+    plugins: [
+      babel(),
     ],
   },
 ];

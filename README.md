@@ -10,8 +10,8 @@ Think of `SimpleModal.open(url)` as an alternative to `window.open(url)`. It ope
 - **Cross-origin Capable:** Cross-origin layers are supported.
 
 ## Installation
-- copy dist/SimpleModal.js to your server
-- add SimpleModal.js to your parent page (and optionally, to your child pages)
+- copy dist/SimpleModal.min.js to your server (or SimpleModal.js and SimpleModal.js.map)
+- add SimpleModal.min.js to your parent page (and optionally, to your child pages)
 - `SimpleModal` is now available globally
 
 ## Parent Window API
