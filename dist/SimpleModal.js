@@ -1,6 +1,6 @@
 /*!
   SimpleModal.js
-  version: 2.6.1
+  version: 2.6.2
   author: Alex Fischer
   homepage: https://github.com/a-p-f/SimpleModal
 */

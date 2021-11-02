@@ -1,3 +1,6 @@
+### 2.6.2
+Document the "animated" option to `replace`.
+
 ### 2.6.1
 Bug fix when using `replace()` inside a modal with `container` set
 
