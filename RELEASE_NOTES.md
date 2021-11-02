@@ -1,3 +1,6 @@
+### 2.6.3
+Publish unminified code with sourcemap
+
 ### 2.6.2
 Document the "animated" option to `replace`.
 
