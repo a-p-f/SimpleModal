@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html simple-modal-config="animate autofocus">
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<script src="/tests/SimpleModal.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js" defer></script>
+<link rel="stylesheet" type="text/css" href="/tests/styles.css">
+
+<link rel="stylesheet" type="text/css" href="/extras/AlertModal.css">
+    
+<p>
+    Try focusing the button in the parent window. It should not focus.
+    <button simple-modal-autofocus onclick="
+        var button = window.parent.document.querySelector('button');
+        button.focus();
+        setTimeout(function() {
+            var ae = window.parent.document.activeElement;
+            console.log(ae);
+            if (ae == button) {
+                alert('Fail! button focused.');
+            }
+            else {
+                alert('Button is not focused. Test passes, assuming current focus state seems reasonable.');
+            }
+        }, 100);
+    ">
+        Focus Parent Button
+    </button>
+</p>
+
+
+<p>
+    <button onclick="SimpleModal.close();">Done</button>
+</p>
+
+<div class="block-margin"></div>
