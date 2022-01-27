@@ -484,6 +484,17 @@ var SimpleModal = (function (exports) {
     - focusing layers when opened/reloaded
     - restoring focus when layers are closed
     */
+    /*
+        Prevent programmatic/browser-automatic focusing of covered elements.
+        
+        We shouldn't have to do this, but we found a case (hard to reproduce), where Safari was focusing a username input on the parent page when it had a modal open. This feature is mainly to protect against that.
+    */
+
+    addEventListener('focus', function (event) {
+      if (event.target.hasOwnProperty('_SimpleModalInitialTabIndex')) {
+        event.target.blur();
+      }
+    }, true); // Fairly inclusive list of (potentially) focusable elements.
     // I used this for guidance: https://allyjs.io/data-tables/focusable.html
 
     var POTENTIALLY_FOCUSABLE = 'a,button,input,textarea,select,summary,[contenteditable],area,audio,video,object,embed,svg,iframe';

@@ -1,3 +1,8 @@
+### 2.6.4
+Prevent programmatic/automatic focus of covered content.
+
+We shouldn't have to do this, but we found a case (hard to reproduce), where Safari was focusing a username input on the parent page when it had a modal open. This feature is mainly to protect against that.
+
 ### 2.6.3
 Publish unminified code with sourcemap
 
