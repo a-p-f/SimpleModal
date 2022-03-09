@@ -183,7 +183,6 @@ addEventListener('message', function(event) {
     // x-origin child explicitly asked to be closed
     if (getMessage(data) == 'CLOSE_SIMPLE_MODAL_CHILD') {
         resolve(layer, event.data.value);
-        closeChild(event.data.value);
     }
     if (getMessage(data) == 'REPLACE_SIMPLE_MODAL') {
         replace(layer, data.url, data.animated);
