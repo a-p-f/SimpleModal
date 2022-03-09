@@ -1,3 +1,6 @@
+### 2.6.5
+x-origin close bug fix
+
 ### 2.6.4
 Prevent programmatic/automatic focus of covered content.
 

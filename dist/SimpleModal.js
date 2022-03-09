@@ -736,7 +736,6 @@ var SimpleModal = (function (exports) {
 
       if (getMessage(data) == 'CLOSE_SIMPLE_MODAL_CHILD') {
         resolve$1(layer, event.data.value);
-        closeChild(event.data.value);
       }
 
       if (getMessage(data) == 'REPLACE_SIMPLE_MODAL') {
@@ -782,7 +781,7 @@ var SimpleModal = (function (exports) {
         });
       } catch (e) {}
     }
-    function closeChild$1(value) {
+    function closeChild(value) {
       var layer = top();
       if (!layer) throw new Error('No modal window is open');
       resolve$1(layer, value);
@@ -790,7 +789,7 @@ var SimpleModal = (function (exports) {
 
     exports.animateOut = animateOut;
     exports.close = close;
-    exports.closeChild = closeChild$1;
+    exports.closeChild = closeChild;
     exports.layerForWindow = layerForWindow;
     exports.open = open$1;
     exports.reload = reload;
