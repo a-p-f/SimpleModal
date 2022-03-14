@@ -662,12 +662,22 @@ var SimpleModal = (function (exports) {
       layer.iframe = iframe;
       layers.push(layer);
       init$2(layer);
+      iframe.src = src;
       init$1(layer.iframe, layer.container);
       init$3(layer);
       init(layer);
-      iframe.addEventListener('load', layerLoaded.bind(null, layer));
-      iframe.src = src;
+      /*
+          We _should_ be able to do this.
+          However, we've run into issues when integrating on external sites, where 3rd party code call stopPropagation on the load event.
+          By using a capturing event listener (on document), this issue is less likely to arise.
+      */
+      // iframe.addEventListener('load', layerLoaded.bind(null, layer));
     }
+    document.addEventListener('load', function (e) {
+      var w = e.target.contentWindow;
+      var layer = w && layerForWindow(w);
+      if (layer) layerLoaded(layer);
+    }, true);
     function resolve$1(layer, value) {
       // Remove it from list
       var index = layers.indexOf(layer);

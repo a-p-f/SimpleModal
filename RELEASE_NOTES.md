@@ -1,3 +1,6 @@
+### 2.6.6
+Load-order related fixes/workarounds
+
 ### 2.6.5
 x-origin close bug fix
 
