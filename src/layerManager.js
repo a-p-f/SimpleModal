@@ -101,6 +101,7 @@ export function open(layer, src) {
     const isFirstLayer = layers.length == 1;
 
     scrollLocking.init(layer);
+    iframe.src = src;
     positioning.init(layer.iframe, layer.container);
     focus.init(layer, isFirstLayer);
     aria.init(layer);
@@ -111,7 +112,6 @@ export function open(layer, src) {
         By using a capturing event listener (on document), this issue is less likely to arise.
     */
     // iframe.addEventListener('load', layerLoaded.bind(null, layer));
-    iframe.src = src;
 }
 document.addEventListener('load', function(e) {
     const w = e.target.contentWindow;
