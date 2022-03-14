@@ -105,9 +105,20 @@ export function open(layer, src) {
     focus.init(layer, isFirstLayer);
     aria.init(layer);
 
-    iframe.addEventListener('load', layerLoaded.bind(null, layer));
+    /*
+        We _should_ be able to do this.
+        However, we've run into issues when integrating on external sites, where 3rd party code call stopPropagation on the load event.
+        By using a capturing event listener (on document), this issue is less likely to arise.
+    */
+    // iframe.addEventListener('load', layerLoaded.bind(null, layer));
     iframe.src = src;
 }
+document.addEventListener('load', function(e) {
+    const w = e.target.contentWindow;
+    const layer = w && layerForWindow(w);
+    if (layer) layerLoaded(layer);
+}, true);
+
 export function resolve(layer, value) {
     // Remove it from list
     const index = layers.indexOf(layer);
