@@ -1,3 +1,6 @@
+### 2.6.7
+Chrome x-origin rendering bug workaround
+
 ### 2.6.6
 Load-order related fixes/workarounds
 

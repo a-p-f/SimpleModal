@@ -1,3 +1,9 @@
+/*!
+  SimpleModal.js
+  version: 2.6.7
+  author: Alex Fischer
+  homepage: https://github.com/a-p-f/SimpleModal
+*/
 var SimpleModal = (function (exports) {
     'use strict';
 
@@ -581,6 +587,17 @@ var SimpleModal = (function (exports) {
       // s.visibility = 'hidden';
 
       s.opacity = 0;
+      /*
+          Chrome rendering bug work around.
+          In very specific cases, Chrome (v99) is not showing our iframe when we later set opacity back to 1.
+          This happens when:
+          - the iframe loads a x-origin url
+          - the domain of the iframe page is not open in any other tab
+           Setting "will-change: opacity" seems to resolve this.
+           Should really file bug report with Chrome.
+      */
+
+      s.willChange = 'opacity';
 
       if (sandbox !== null) {
         iframe.setAttribute('sandbox', sandbox);
