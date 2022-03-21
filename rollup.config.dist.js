@@ -28,6 +28,7 @@ export default [
   {
     input: 'src/SimpleModal.js',
     output: {
+      banner,
       file: 'dist/SimpleModal.js',
       format: 'iife',
       name: 'SimpleModal',
