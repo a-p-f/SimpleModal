@@ -1,3 +1,6 @@
+### 2.6.8
+Bug fix - properly re-focus contenteditable elements.
+
 ### 2.6.7
 Chrome x-origin rendering bug workaround
 

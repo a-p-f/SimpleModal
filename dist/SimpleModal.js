@@ -1,6 +1,6 @@
 /*!
   SimpleModal.js
-  version: 2.6.7
+  version: 2.6.8
   author: Alex Fischer
   homepage: https://github.com/a-p-f/SimpleModal
 */
@@ -570,7 +570,11 @@ var SimpleModal = (function (exports) {
       }
 
       var ae = layer.initialActiveElement;
-      if (ae && ae.tabIndex >= 0) ae.focus();
+      if (ae // exclude anything we've explicitly disabled
+      // We can't naively check against tabindex (property or attribute), because the previous ae might actually have had a negative tab index.
+      && !ae.hasOwnProperty('_SimpleModalInitialTabIndex') // Some browsers report document.body as document.activeElement when nothing is focused
+      // We don't want to focus that (might cause scrolling)
+      && ae != document.body) ae.focus();
     }
 
     var layers = [];
