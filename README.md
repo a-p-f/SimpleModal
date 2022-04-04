@@ -181,3 +181,4 @@ If x-origin, don't use a prefix - assume you're the topmost layer on this domain
 - ability to opt-out of tabindex/aria-hidden manipulation
 
 - file bug report with Chrome about x-origin rendering bug (see comment in layerManager.make_iframe - ideally, we can remove the workaround once Chrome fixes their issue)
+- add test to ensure that [contenteditable] elements regain focus after closing

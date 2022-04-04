@@ -73,6 +73,7 @@ function is_covered(e, excluding) {
     if (e.parentElement) return is_covered(e.parentElement, excluding);
     return false;
 }
+
 // TODO - more efficient algorithm? Could work top-down/backwards
 // Getting it right in all scenarios (including concurrent modals, in different containers) isn't straight-forward
 // This is a bit of a brute-force approach, but it should be correct
@@ -84,5 +85,14 @@ export function release(layer) {
         if (!is_covered(e, layer.iframe)) unblock(e);
     }
     const ae = layer.initialActiveElement;
-    if (ae && ae.tabIndex >= 0) ae.focus();
+
+    if (
+        ae
+        // exclude anything we've explicitly disabled
+        // We can't naively check against tabindex (property or attribute), because the previous ae might actually have had a negative tab index.
+        && !ae.hasOwnProperty('_SimpleModalInitialTabIndex')
+        // Some browsers report document.body as document.activeElement when nothing is focused
+        // We don't want to focus that (might cause scrolling)
+        && ae != document.body
+    ) ae.focus();
  }
