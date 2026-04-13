@@ -182,3 +182,7 @@ If x-origin, don't use a prefix - assume you're the topmost layer on this domain
 
 - file bug report with Chrome about x-origin rendering bug (see comment in layerManager.make_iframe - ideally, we can remove the workaround once Chrome fixes their issue)
 - add test to ensure that [contenteditable] elements regain focus after closing
+
+- scroll locking seems broken (again) -> drop our imlplementation, and user overscroll-behaviour (does NOT work on iframe, so we'll either have to add a wrapping scrolling element, or set this on html and body of child window)
+    + note: scroll locking seems broken when you have `html, body {height: 100%}`
+    + note: might want to leave scroll locking as-is in the "container" case
