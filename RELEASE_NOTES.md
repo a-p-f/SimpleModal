@@ -1,3 +1,6 @@
+### 2.6.9
+Bug fix - remove bug where child pages containing a non-SimpleModal iframe would automatically re-focus the iframe when the user clicked inside then outside the iframe.
+
 ### 2.6.8
 Bug fix - properly re-focus contenteditable elements.
 

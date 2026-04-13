@@ -1,6 +1,6 @@
 /*!
   SimpleModal.js
-  version: 2.6.8
+  version: 2.6.9
   author: Alex Fischer
   homepage: https://github.com/a-p-f/SimpleModal
 */
@@ -75,8 +75,6 @@ var SimpleModal = (function (exports) {
       return a.href;
     }
 
-    var ae = document.activeElement; // Listen to messages from parent
-
     if (window.parent != window) {
       addEventListener('message', function (event) {
         if (event.source != window.parent) return;
@@ -94,18 +92,6 @@ var SimpleModal = (function (exports) {
           // If we're animating this window, don't autofocus until animation done
           if (config.autofocus && !config.animate) autofocus();
         }
-      });
-      trackAndRestoreFocus();
-    }
-
-    function trackAndRestoreFocus() {
-      // track active element within this iframe
-      document.documentElement.addEventListener('focus', function () {
-        ae = document.activeElement;
-      }, true); // when iframe regains focus, re-focus the correct element
-
-      addEventListener('focus', function () {
-        ae && ae.focus();
       });
     }
 
@@ -132,7 +118,6 @@ var SimpleModal = (function (exports) {
 
       if (target) {
         target.focus();
-        ae = target;
       }
     }
 
