@@ -20,19 +20,6 @@ if (window.parent != window) {
             if (config.autofocus && !config.animate) autofocus();
         }
     });
-    trackAndRestoreFocus();
-}
-
-function trackAndRestoreFocus() {
-    // track active element within this iframe
-    document.documentElement.addEventListener('focus', function() {
-        ae = document.activeElement;
-    }, true);
-
-    // when iframe regains focus, re-focus the correct element
-    addEventListener('focus', function() {
-        ae && ae.focus();
-    });
 }
 
 function custom_event(name, params) {
